@@ -1,11 +1,9 @@
 /*
-
     Compilar e gravar:
         $ msp430-gcc -mmcu=msp430g2553 -o mspSerialTest.elf mspSerialTest.c
         $ mspdebug rf2500
         (mspdebug) prog mspSerialTest.elf
         (mspdebug) Ctrl+D
-
 */
 
 

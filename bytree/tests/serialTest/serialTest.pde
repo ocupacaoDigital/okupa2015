@@ -25,7 +25,7 @@ void keyPressed() {
   if (keyCode == ENTER) {
     val += '\n';
     myPort.write(val);
-    val = "";
+    val = ""; 
   } else if (keyCode == BACKSPACE) {
     val = val.substring(0, val.length() - 1);
   } else if (key >= '0' && key <= '9') {
