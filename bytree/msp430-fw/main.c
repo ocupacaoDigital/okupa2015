@@ -5,6 +5,12 @@
     Plataforma:
         - MSP430G2553
 
+    Compilar e gravar:
+        $ msp430-gcc -mmcu=msp430g2553 -o main.elf main.c
+        $ mspdebug rf2500
+        (mspdebug) prog main.elf
+        (mspdebug) Ctrl+D
+
 */
 
 
@@ -21,17 +27,15 @@
 // período total para o Algoritmo de Bresenham
 #define TOTAL_CICLOS 10
 
-
 void Serial_config(void);
 void Serial_receive(void);
 void P1_interrupcao(void);
+void String_cat(char *, char);
 
-// pontuação do jogador A
-int pontosPlayerA;
 // pontuação recebida pela UART
 char serialString[4];
-// contador de cilcos para o Algoritmo de Bresenham
-uint8_t contCiclos = 0;
+// contadores para o Algoritmo de Bresenham
+uint8_t contCiclos = 0, ciclosPlayerA, ciclosPlayerB, E_A, E_B;
 
 void main(void){
     
@@ -54,7 +58,6 @@ void main(void){
     P1IFG = 0;
 
     // limpa a string
-    // strcpy(serialString, "");
     serialString[0] = '\0';
 
     Serial_config();
@@ -110,18 +113,25 @@ void Serial_config(void){
 __interrupt void Serial_receive(void){
 
     // concatena
-    strcat(serialString, UCA0RXBUF);
+    char dado = UCA0RXBUF;
+    String_cat(serialString, dado);
 
-    if(UCA0RXBUF != '\0'){
-        // converte a string para (int)
-        playerA = atoi(serialString);
-        
-        // limpa a string
-        //strcpy(serialString, "");
-        serialString[0] = '\0';
+    if(dado == '\n'){
+
+        // qtde de ciclos a serem distribuídos
+        ciclosPlayerA = (uint8_t) (((float) atoi(serialString) / 100.0) * TOTAL_CICLOS);
+        ciclosPlayerB = TOTAL_CICLOS - ciclosPlayerA;
+
+        // cte de Bresenham
+        E_A = 2*ciclosPlayerA - TOTAL_CICLOS;
+        E_B = 2*ciclosPlayerB - TOTAL_CICLOS;
 
         // força o reset
         contCiclos = TOTAL_CICLOS;
+
+        // limpa a string
+        serialString[0] = '\0';
+
     }
 
     // limpa flag interrupt serial
@@ -133,14 +143,6 @@ __interrupt void P1_interrupcao(void){
 
     /* implementação do Algoritmo de Bresenham */
 
-    // qtde de ciclos a serem distribuídos
-    uint8_t ciclosPlayerA = (uint8_t) (((float)pontosPlayerA / 100.0) * TOTAL_CICLOS);
-    uint8_t ciclosPlayerB = (uint8_t) (((float)(100-pontosPlayerA) / 100.0) * TOTAL_CICLOS);
-
-    // cte de Bresenham
-    static uint8_t E_A = 2*ciclosPlayerA - TOTAL_CICLOS;
-    static uint8_t E_B = 2*ciclosPlayerB - TOTAL_CICLOS;
-
     // reset após o período TOTAL_CICLOS
     if(contCiclos++ >= TOTAL_CICLOS){
         contCiclos = 0;
@@ -149,7 +151,7 @@ __interrupt void P1_interrupcao(void){
     }
 
     // ativa o TRIAC caso este ciclo seja selecionado. desativa caso contrário
-    if(E_A){
+    if(E_A >= 0){
         E_A += 2*(ciclosPlayerA - TOTAL_CICLOS);
         P1OUT |= LED_A;
     }else{
@@ -157,7 +159,7 @@ __interrupt void P1_interrupcao(void){
         P1OUT &= ~LED_A;
     }
 
-    if(E_B){
+    if(E_B >= 0){
         E_B += 2*(ciclosPlayerB - TOTAL_CICLOS);
         P1OUT |= LED_B;
     }else{
@@ -173,4 +175,10 @@ __interrupt void P1_interrupcao(void){
 
     // limpa flag interrupt P1
     P1IFG &= ~OPTO;
+}
+
+void String_cat(char *str, char dado){
+    while(*str) str++;
+    *str = dado;
+    *(str+1) = '\0';
 }
