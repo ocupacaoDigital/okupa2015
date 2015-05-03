@@ -35,7 +35,8 @@ void String_cat(char *, char);
 // pontuação recebida pela UART
 char serialString[4];
 // contadores para o Algoritmo de Bresenham
-uint8_t contCiclos = 0, ciclosPlayerA, ciclosPlayerB, E_A, E_B;
+uint8_t contCiclos = 0, ciclosPlayerA, ciclosPlayerB;
+int8_t E_A, E_B;
 
 void main(void){
     
