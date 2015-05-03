@@ -102,7 +102,7 @@ __interrupt void Serial_receive(void){
 
     // concatena
     char dado = UCA0RXBUF;
-    String_cat(serial_str, UCA0RXBUF);
+    String_cat(serial_str, dado);
 
     if(dado == '\n'){
         pisca(atoi(serial_str));
