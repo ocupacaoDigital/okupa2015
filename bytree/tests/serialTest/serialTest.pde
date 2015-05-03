@@ -1,8 +1,7 @@
 import processing.serial.*;
 
-Serial myPort;  // Create object from Serial class
+Serial myPort;
 String val = "";
-
 
 void setup() 
 {
