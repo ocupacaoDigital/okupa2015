@@ -1,3 +1,32 @@
+/*
+ColorScheme( color root, float contrast )
+
+UISet( float m, float l, float c )
+UISet( float m, float l, float c, float h, float v )
+  setScheme(color root, float contrast )
+  beginColumn(int l, int c)
+  beginRow(int l, int c)
+  displayGrid()
+  exe()
+  addLabel(String s, float x, float y)
+  addLabel(int l, int c, String s)
+  addLabel(int l, int c, letter inc)
+  addElement( UIElement E )
+  addToggle(int l, int c, String label, char p, bool i)
+  addNumSet(int l, int c, number i, float s)
+  addCharSet(int l, int c, String label, char p, letter i, char s)
+  addNumAdd(int l, int c, number i, float step, float min, float max)
+  addPlusMinus(int l, int c, number i, boolean integer, float step, float min, float max)
+  addSlider(int l, int c,  number i, float min, float max)
+  addDropDown(int l, int c,  String label, char p, letter i)
+  addYanker(int l, int c,  number i, float dom, float exp, float coeff, float min, float max)
+  addColorSelector(int l, int c)
+
+Static_String_Label(String st, char p, float x_, float y_, float w, float h)
+Dynamic_Word_Label(word w_, char p, float x_, float y_, float w, float h)
+Dynamic_Number_Label(number i, char p, float x_, float y_, float w, float h)
+Dynamic_Letter_Label(letter i, char p, float x_, float y_, float w, float h)
+*/
 int textsize;
 
 class number {
