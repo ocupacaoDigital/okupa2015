@@ -5,12 +5,15 @@ FWorld world; // variavel 'mundo' do fisica.
 boolean up, down, left, right, w, a, s, d;
 float Acmds, scoreBar;
 
-UISet MainMenu;
+UISet MainMenu, PlayerOptions;
 
 Editor mapEditor;
 
-CommandPt[] cmds;
-//FBox[] players;
+ArrayList<CommandPt> cmds;
+
+ArrayList<Player> players;
+
+FBox[] p;
 FBox p1, p2;
 FBox [] wall;
 
@@ -42,15 +45,16 @@ void setup(){
   textSize(textsize);
   
   Init_Fisica();
+  init_game();
   init_MainMenu_UI();
+  init_Options_UI();
+  init_sides( 30 );
   
-  cmds = new CommandPt[100];
-  for(int i=0; i<100; i++){
-    cmds[i] = new CommandPt();
-  }
+
 }
 void draw(){
   //println(frameRate);
+  background(255);
   switch( moment.l ){ //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
     case 'm'://MAIN MENU|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     
@@ -62,7 +66,7 @@ void draw(){
       scoreBar=(3/5f)*width;
       Acmds=0;
       for(int i=0; i<10; i++){
-        if(cmds[i].type() == 'a'){
+        if(cmds.get(i).type() == 'a'){
           Acmds++;
         }
       }
@@ -153,7 +157,7 @@ void draw(){
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'o'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
     
-      //Options();
+      Options();
       
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'c'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\

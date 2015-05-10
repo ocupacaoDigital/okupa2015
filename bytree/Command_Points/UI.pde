@@ -8,12 +8,12 @@ UISet( float m, float l, float c, float h, float v )
   beginRow(int l, int c)
   displayGrid()
   exe()
-  addLabel(String s, float x, float y)
-  addLabel(int l, int c, String s)
+  addLabel(float x, float y, String s)
+  addLabel(int l, int c, String s, char p)
   addLabel(int l, int c, letter inc)
   addElement( UIElement E )
   addToggle(int l, int c, String label, char p, bool i)
-  addNumSet(int l, int c, number i, float s)
+  addNumSet(int l, int c, String label, char p, number i, float s)
   addCharSet(int l, int c, String label, char p, letter i, char s)
   addNumAdd(int l, int c, number i, float step, float min, float max)
   addPlusMinus(int l, int c, number i, boolean integer, float step, float min, float max)
@@ -59,6 +59,14 @@ class word {
   }
   word(String w) {
     this.w = w;
+  }
+}
+class pigment {
+  public color p;
+  pigment() {
+  }
+  pigment(color p) {
+    this.p = p;
   }
 }
 //()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H()H
@@ -119,6 +127,8 @@ class UISet{
     j = c;
     c = 0;
   }
+  void endRow(){rowing = false;}
+  void endColumn(){columning = false;}
   
   void displayGrid(){
     rect( margin, margin, width - 2 * margin, height - 2 * margin );
@@ -143,20 +153,38 @@ class UISet{
     labels.add( l );
   }
   
-  void addLabel(String s, float x, float y){
+  void addLabel(float x, float y, String s){
     labels.add( new Label( s, '0', x, y, 0, 0) );
   }
   
-  void addLabel(int l, int c, String s){
+  void addLabel(int l, int c, String s, char p){
     float x = margin + (l * line);
     float y = margin + (c * column);
-    labels.add( new Label( s, 'c', x, y, line, column) );
+    labels.add( new Static_String_Label( s, p, x, y, line, column) );
   }
   
   void addLabel(int l, int c, letter inc){
     float x = margin + (l * line);
     float y = margin + (c * column);
     labels.add( new Dynamic_Letter_Label( inc, 'c', x, y, line, column) );
+  }
+  
+  UIElement get( String s ){
+    for(int i = 0; i < set.size(); i++){
+      if( s.equals( set.get(i).label.returnS() ) ){
+        return set.get(i);
+      }
+    }
+    return null;
+  }
+  
+  void remove( String s ){
+    for(int i = 0; i < set.size(); i++){
+      if( s.equals( set.get(i).label.returnS() ) ){
+        set.remove(i);
+        break;
+      }
+    }
   }
   
   void addElement( UIElement E ){
@@ -181,18 +209,18 @@ class UISet{
     else println( "addToggle", label, "failed: not columning nor rowing." );
   }
   //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-  void addNumSet(int l, int c, number i, float s) {
+  void addNumSet(int l, int c, String label, char p, number i, float s) {
     float x = margin + (l * line) + ( ( (ceil(H_percent) - H_percent) * line ) / 2f );
     float y = margin + (c * column) + ( ( (ceil(V_percent) - V_percent ) * column) / 2f );
-    set.add( new NumSetButton( x, y, H_percent * line, V_percent * column, i, s) );
+    set.add( new NumSetButton( x, y, H_percent * line, V_percent * column, label, p, i, s) );
   }
-  void addNumSet(number inc, float s) {
+  void addNumSet(String label, char p, number inc, float s) {
     if( columning ){
-      this.addNumSet( i, j + c, inc, s );
+      this.addNumSet( i, j + c, label, p, inc, s );
       c++;
     }
     else if( rowing ){
-      this.addNumSet( i + c, j, inc, s );
+      this.addNumSet( i + c, j, label, p, inc, s );
       c++;
     }
     else println( "addNumSet failed: not columning nor rowing." );
@@ -299,18 +327,18 @@ class UISet{
     else println( "addYanker failed: not columning nor rowing." );
   }    
   //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-  void addColorSelector(int l, int c) {
+  void addColorSelector(int l, int c, pigment p) {
     float x = margin + (l * line) + ( ( (ceil(H_percent) - H_percent) * line ) / 2f );
     float y = margin + (c * column) + ( ( (ceil(V_percent) - V_percent ) * column) / 2f );
-    set.add( new ColorSelector( x, y, H_percent * line, V_percent * column) );
+    set.add( new ColorSelector( x, y, H_percent * line, V_percent * column, p) );
   }
-  void addColorSelector() {
+  void addColorSelector(pigment p) {
     if( columning ){
-      this.addColorSelector( i, j + c);
+      this.addColorSelector( i, j + c, p);
       c++;
     }
     else if( rowing ){
-      this.addColorSelector( i + c, j);
+      this.addColorSelector( i + c, j, p);
       c++;
     }
     else println( "addColorSelector failed: not columning nor rowing." );
@@ -325,6 +353,7 @@ class UISet{
 class Label{
   float x, y;
   public color c;
+  Label(){}
   Label(String st, char p, float x_, float y_, float w, float h){
     int pad = 4;
     switch(p){
@@ -360,12 +389,14 @@ class Label{
     c = color(0);
   }
   void display(){}
+  String returnS(){ return " "; }
 }
 
 // \|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\
 
 class Static_String_Label extends Label{
   public String s;
+  Static_String_Label(String st){s = st;}
   Static_String_Label(String st, char p, float x_, float y_, float w, float h){
     super(st, p, x_, y_, w, h);
     s = st;
@@ -374,6 +405,7 @@ class Static_String_Label extends Label{
     fill(c);
     text(s, x, y);
   }
+  String returnS(){ return s; }
 }
 
 // \|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\|/|\
@@ -442,6 +474,7 @@ class UIElement {
   }
   void exe(color dimmer, color dim, color bright, color brighter){}
   void add(char set, String label, char pos){}
+  void setColor( color c ){}
 }
 
 //8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8  8
@@ -482,16 +515,11 @@ class ToggleButton extends UIElement {
 class NumSetButton extends UIElement {
   number incumbency;
   float set;
-  NumSetButton(float x, float y, float w, float h, number i, float s) {
+  NumSetButton(float x, float y, float w, float h, String label_, char p, number i, float s) {
     super(x, y, w, h);
     incumbency = i;
     set = s;
-  }
-  void createLabel(String label_, char p){
     label = new Static_String_Label(label_, p, x, y, w, h);
-  }
-  void createLabel(char p){
-    label = new Dynamic_Number_Label(incumbency, p, x, y, w, h);
   }
   void exe(color dimmer, color dim, color bright, color brighter) {
     if ( mouse_over() ) {
@@ -760,47 +788,52 @@ class subSlider extends UIElement {
 //==================================================================================
 
 class ColorSelector extends UIElement {
-  public color c;
+  pigment incumbency;
   subSlider red, green, blue;
   float bw;
   float bh;
   float N;
   float margin;
-  ColorSelector(float x, float y, float w, float h) {
+  ColorSelector(float x, float y, float w, float h, pigment p) {
     super(x, y, w, h);
-    float w3 = w/3f;
-    red = new subSlider(x, y, w3, h-w3, 0, 255);
-    green = new subSlider(x + w3, y, w3, h-w3, 0, 255);
-    blue = new subSlider(x + 2*w3, y, w3, h-w3, 0, 255);
+    incumbency = p;
     margin = 2;
     bw = (w - (4*margin))/3f;
-    bh = (h-w3) - 2*margin;
-    N = 70;
+    bh = (h - (w/3f)) - 3*margin;
+    red =   new subSlider(margin + x, y, bw, bh, 0, 255);
+    green = new subSlider(2*margin + bw + x , y, bw, bh, 0, 255);
+    blue =  new subSlider(3*margin + 2*bw + x, y, bw, bh, 0, 255);
+    N = 90;
+    label = new Static_String_Label("colorSelector");
+  }
+  void setColor( color c ){
+    red.n = red(c);
+    green.n = green(c);
+    blue.n = blue(c);
   }
   void exe(color dimmer, color dim, color bright, color brighter) {
-    
     red.exe();
     green.exe();
     blue.exe();
-    c = color(red.n, green.n, blue.n);
+    incumbency.p = color(red.n, green.n, blue.n);
     
     fill(0);stroke(0);
     Rect();
     
     for(float i = 1; i<=N ; i++){
-      color co = lerpColor(color(255, green(c), blue(c)), color(0, green(c), blue(c)), i/N);
+      color co = lerpColor(color(255, green(incumbency.p), blue(incumbency.p)), color(0, green(incumbency.p), blue(incumbency.p)), i/N);
       fill(co);stroke(co);
       rect(x + margin, y + margin + ((i-1)*(bh/N)), bw, bh/N);
     }
     x += bw+margin;
     for(float i = 1; i<=N ; i++){
-      color co = lerpColor(color(red(c), 255, blue(c)), color(red(c), 0, blue(c)), i/N);
+      color co = lerpColor(color(red(incumbency.p), 255, blue(incumbency.p)), color(red(incumbency.p), 0, blue(incumbency.p)), i/N);
       fill(co);stroke(co);
       rect(x + margin, y + margin + ((i-1)*(bh/N)), bw, bh/N);
     }
     x += bw+margin;
     for(float i = 1; i<=N ; i++){
-      color co = lerpColor(color(red(c), green(c), 255), color(red(c), green(c), 0), i/N);
+      color co = lerpColor(color(red(incumbency.p), green(incumbency.p), 255), color(red(incumbency.p), green(incumbency.p), 0), i/N);
       fill(co);stroke(co);
       rect(x + margin, y + margin + ((i-1)*(bh/N)), bw, bh/N);
     }
@@ -809,8 +842,8 @@ class ColorSelector extends UIElement {
     red.display(dimmer, dim, bright, brighter);
     green.display(dimmer, dim, bright, brighter);
     blue.display(dimmer, dim, bright, brighter);
-    fill(c);
-    rect(x + margin, bh + 7.5*margin, w - 2*margin, (w/3f) -2*margin);
+    fill(incumbency.p);
+    rect(x + margin, y + bh + 3*margin, w - 2*margin, (w/3f) -2*margin); //+ 7.5*margin
   }
 }
 

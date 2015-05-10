@@ -1,8 +1,20 @@
 
 class Player{
-  
-  float p1Ownage=0, p2Ownage=0, p1Score=0, p2Score=0, p1acc=600, p2acc=600;
-  int p1Wins=0, p2Wins=0; // vitorias
+  public color c; 
+  public char shape;
+  float ownage, score, acc;
+  int wins;
+  Player(){
+    c = color(random(255), random(255), random(255));
+    char s = ' ';
+    switch( int(random(-0.4999, 3.4999))){
+      case 0: s = 't'; break;
+      case 1: s = 's'; break;
+      case 2: s = 'p'; break;
+      case 3: s = 'h'; break;
+    }
+    shape = s;
+  }
 }
 
 class Editor{
@@ -20,8 +32,8 @@ class Editor{
     background(230);
       
       for(int i=0; i<10; i++){
-        if(cmds[i].active){
-          cmds[i].go();
+        if(cmds.get(i).active){
+          cmds.get(i).go();
         }
       }
       

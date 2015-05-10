@@ -38,11 +38,48 @@ void init_MainMenu_UI(){
   moment = new letter('m');
   
   MainMenu = new UISet( 12, 5, 12, 0.95, 0.95 );
-  MainMenu.setScheme( color(255, 19, 26),  30);
+  MainMenu.setScheme( #FC9C00,  30); //color(255, 19, 26)
   MainMenu.beginColumn(2, 6);
   MainMenu.addCharSet("Play", 'c', moment, 'f');
   MainMenu.addCharSet("Player Options", 'c', moment, 'o');
   MainMenu.addCharSet("Map Editor", 'c', moment, 'e');
   MainMenu.addCharSet("Credits", 'c', moment, 'c');
   MainMenu.addCharSet("Exit", 'c', moment, 'x');
+}
+
+//@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q
+
+void init_Options_UI(){
+  playerCount = new number(2);
+  selectedPlayer = new number(0);
+  assignShape = new letter( players.get(0).shape );
+  assignColor = new pigment( players.get(0).c );
+  
+  PlayerOptions = new UISet( 12, 9, 13, 1, 0.8 );
+  PlayerOptions.setScheme( #FC9C00,  30);
+  //PlayerOptions.beginColumn(0, 1);
+  PlayerOptions.addLabel(0, 0, "Player Count:", 'c');
+  PlayerOptions.addPlusMinus(1, 0, playerCount, true, 1, 2, 4);
+  for( int i = 0; i < playerCount.n; i++ ){
+    PlayerOptions.addNumSet( i, 1, "P"+str(i+1), 'c', selectedPlayer, i);
+  }
+  PlayerOptions.beginRow(1, 2);
+  PlayerOptions.addCharSet("Triangle", 'c', assignShape, 't');
+  PlayerOptions.addCharSet("Square", 'c', assignShape, 's');
+  PlayerOptions.addCharSet("Pentagon", 'c', assignShape, 'p');
+  PlayerOptions.addCharSet("Hexagon", 'c', assignShape, 'h');
+  PlayerOptions.endRow();
+  PlayerOptions.addCharSet(8, 12, "Done", 'c', moment, 'm');
+  PlayerOptions.V_percent = 10.8;
+  PlayerOptions.addColorSelector(0, 2, assignColor);
+  PlayerOptions.V_percent = 0.8;
+  PlayerOptions.get("colorSelector").setColor( players.get(0).c );
+ // PlayerOptions.add();
+}
+
+void init_game(){
+   cmds = new ArrayList();
+   players = new ArrayList();
+   players.add( new Player() );
+   players.add( new Player() );
 }
