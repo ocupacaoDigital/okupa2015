@@ -3,17 +3,17 @@ import fisica.*;
 FWorld world; // variavel 'mundo' do fisica.
 
 boolean up, down, left, right, w, a, s, d;
-float Acmds, scoreBar;
 
-UISet MainMenu, PlayerOptions;
+
+UISet MainMenu, Settings;
 
 Editor mapEditor;
 
-ArrayList<CommandPt> cmds;
+Map currentMap;
 
 ArrayList<Player> players;
 
-FBox[] p;
+FPoly[] p;
 FBox p1, p2;
 FBox [] wall;
 
@@ -44,7 +44,6 @@ void setup(){
   textsize = 16;
   textSize(textsize);
   
-  Init_Fisica();
   init_game();
   init_MainMenu_UI();
   init_Options_UI();
@@ -62,7 +61,11 @@ void draw(){
       
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'f'://PRE-GAME/|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
-    
+      
+      Init_Fisica();
+      
+      
+      /*
       scoreBar=(3/5f)*width;
       Acmds=0;
       for(int i=0; i<10; i++){
@@ -70,6 +73,7 @@ void draw(){
           Acmds++;
         }
       }
+      */
      moment.l = 'g'; 
      
 

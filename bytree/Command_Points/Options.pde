@@ -16,14 +16,14 @@ void Options(){
   float pplayerCount = playerCount.n;
   float pselectedPlayer = selectedPlayer.n;
   
-  PlayerOptions.exe();
+  Settings.exe();
   
   if(pplayerCount != playerCount.n){
     for( int i = 0; i < pplayerCount; i++ ){
-      PlayerOptions.remove( "P"+str(i+1) );
-    }
+      Settings.remove( "P"+str(i+1) );
+    } 
     for( int i = 0; i < playerCount.n; i++ ){
-      PlayerOptions.addNumSet( i, 1, "P"+str(i+1), 'c', selectedPlayer, i);
+      Settings.addNumSet( i, 1, "P"+str(i+1), 'c', selectedPlayer, i);
     }
     if(pplayerCount < playerCount.n){
       players.add( new Player() );
@@ -32,7 +32,11 @@ void Options(){
     else players.remove(players.size()-1);
   }
   if(pselectedPlayer != selectedPlayer.n){
-    PlayerOptions.get("colorSelector").setColor( players.get(int(selectedPlayer.n)).c );
+    Settings.get("colorSelector").setColor( players.get(int(selectedPlayer.n)).c );
     assignShape.l =  players.get(int(selectedPlayer.n)).shape;
+  }
+  else{
+    players.get(int(selectedPlayer.n)).shape = assignShape.l;
+    players.get(int(selectedPlayer.n)).c = assignColor.p;
   }
 }
