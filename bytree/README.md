@@ -8,8 +8,8 @@ Diretórios:
 - [msp430-fw](https://github.com/ocupacaoDigital/okupa2015/tree/master/bytree/msp430-fw)
 	- firmware do uControlador MSP430G2553
     - dimmer com implementação do algorítmo de Bresenham
-- [p5-sketch](https://github.com/ocupacaoDigital/okupa2015/tree/master/bytree/p5-sketch)
-	- arquivos P5
+- [Command_Points](https://github.com/ocupacaoDigital/okupa2015/tree/master/bytree/Command_Points)
+	- P5 sketch
     - interface serial com o msp430
 - [schematic](https://github.com/ocupacaoDigital/okupa2015/tree/master/bytree/schematic)
 	- esquemático do projeto
