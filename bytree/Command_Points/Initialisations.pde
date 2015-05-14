@@ -1,5 +1,4 @@
-void Init_Fisica(){
-  
+void init_fisica_world(){
   Fisica.init(this);
   world = new FWorld();
   world.setEdges();  // paredes ao redor da tela
@@ -8,12 +7,15 @@ void Init_Fisica(){
   world.setGrabbable(false); // objetos do fisica podem ser arrastados pelo mouse por default
   
   FLine top = new FLine(width, 0, 0, 0);
-  top.setPosition(0, 50);
+  top.setPosition(0, header);
   world.add(top);
   
+}
+
+void init_fisica_players(){
   p = new FPoly[int(playerCount.n)];
   for( int i = 0; i < playerCount.n; i++ ){
-    p[i] = new Fpoly();
+    p[i] = new FPoly();
     p[i].setFill( players.get(i).c );
     p[i].setDamping(1.5);
     p[i].setFriction(0.9);
@@ -38,16 +40,16 @@ void Init_Fisica(){
       break;
       case 'p': 
       l = penta_l;
-      float k = l / 1.175570505;
+      k = l / 1.175570505;
       float a = TWO_PI/5f;
       float o = - HALF_PI;
-      for(int i = 0; i < 5; i ++){
-        p[i].vertex( x + k * cos( (i * a) + o ), y + k * sin( (i * a) + o ) );
+      for(int r = 0; r < 5; r ++){
+        p[i].vertex( x + k * cos( (r * a) + o ), y + k * sin( (r * a) + o ) );
       }
       break;
       case 'h': 
       l = hex_l;
-      float k = PI/3f;
+      k = PI/3f;
       p[i].vertex(x + l, y);
       p[i].vertex(x + l * cos(k), y + l * sin(k));
       p[i].vertex(x + l * cos(2*k), y + l * sin(2*k));
@@ -76,6 +78,8 @@ void init_MainMenu_UI(){
   MainMenu.addCharSet("Map Editor", 'c', moment, 'e');
   MainMenu.addCharSet("Credits", 'c', moment, 'c');
   MainMenu.addCharSet("Exit", 'c', moment, 'x');
+  
+  header = 12 + (2/13f)*height;
 }
 
 //@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q@Q
@@ -109,7 +113,7 @@ void init_Options_UI(){
 }
 
 void init_game(){
-   cmds = new ArrayList();
+   //cmds = new ArrayList();
    players = new ArrayList();
    players.add( new Player() );
    players.add( new Player() );

@@ -24,8 +24,8 @@ class Map{
 }
 
 class CommandPt {
-  float x, y, size, ease, owner, scoreRate;
-  char type;
+  public float x, y, size, ease, owner, scoreRate;
+  public char type;
   boolean active;
   CommandPt(){
     active = false;
@@ -39,21 +39,8 @@ class CommandPt {
   type = type_;
   scoreRate = scoreRate_;    //1/60f;
   active = true;
-  /*
-  types:
-  a: standard
-  b: dynamic, adds score
-  c: subtracts from adversary
-  d: robber
-  s: speed bonus
-  w: weight bonus
-  */
 }
-  char type(){return type;}
-  boolean active(){return active;}
-  float owner(){return owner;}
-  void setOwner(float owner_){owner=owner_;}
-  void go(){
+  void exe(){
     if(owner<0){
       float theta = map(owner, -50.01, 0, 3*HALF_PI, -HALF_PI);
       fill(255);
@@ -177,4 +164,16 @@ boolean is(int i, float x, float y, float size){ //detecta a presenca do FBox de
     }
   }
   return is;
+}
+
+class Item {
+  /*
+  lock
+  bomb (destroys lock)
+  freeze AOE (x3)
+  push AOE (x5)
+  instacapture
+  speed
+  weight
+  */
 }

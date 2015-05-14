@@ -1,15 +1,31 @@
 class Editor{
-  int W=0,C=0, wait=0;
-  float xi, yi, xf, yf; //valores da criacao de paredes 
-  //char Otype='a'; 
+  float xo, yo, tileEdge, tileRad;
+  float xi, yi, xf, yf; 
   PImage CmdPtIcon, WallsIcon, TilesIcon;
-  boolean makingCmds=false, creatingWall=false, makingWalls=false, makingTiles=false, deleting=false, settingType=false, settingSize=false, settingEase=false, settingScoreRate=false;
-  float Osize = 58, Oease = 1/90f, OscoreRate = 1/60f;
+  boolean creatingWall, pushed, draggingStp, deleting;
+  int stpSelected;
+  ArrayList<PVector>i; // temp storage for walls
+  ArrayList<PVector>f;
+  ArrayList<PVector>stpts2; // temp storage for starting points
+  ArrayList<PVector>stpts3;
+  ArrayList<PVector>stpts4;
+  ArrayList<CommandPt> tempCmds;
   UISet ui, cmd, stp, til, wal;
   letter action, cmdType;
-  number cmdSize, ease, wallWidth, stpPlayer;
+  number cmdSize, ease, wallWidth, totalPlayers;
   
   Editor(){
+    tileEdge = 80;
+    tileRad = tileEdge/2f;
+    xo = (tileEdge*((width/tileEdge) - floor(width/tileEdge)))/2f;
+    yo = (tileEdge*(((height-header)/tileEdge) - floor((height-header)/tileEdge)))/2f;
+    i = new ArrayList();
+    f = new ArrayList();
+    stpts2 = new ArrayList();
+    stpts3 = new ArrayList();
+    stpts4 = new ArrayList();
+    tempCmds = new ArrayList();
+    
     action = new letter('c');
     ui = new UISet( 12, 9, 13, 1, 0.8 );
     ui.setScheme( #FC9C00,  30);
@@ -22,32 +38,34 @@ class Editor{
     cmdType = new letter('a');
     cmdSize = new number( 80 );
     ease = new number( 2 );
-    cmd = new UISet( 12, 9, 13, 1, 0.8 );
+    cmd = new UISet( 12, 9, 13, 0.95, 0.8 );
     cmd.setScheme( #FC9C00,  30);
-    cmd.beginRow( 0, 1 );  
-    cmd.addDropDown( "cmdPt type", 'c', cmdType );
+    cmd.addDropDown( 0, 1, "cmdPt type", 'c', cmdType );
     cmd.set.get(0).add('a', "victory", 'c');
+    cmd.set.get(0).add('a', "score", 'c');
     cmd.set.get(0).add('s', "Speed", 'c');
     cmd.set.get(0).add('w', "Weight", 'c');
     cmd.set.get(0).add('l', "Lock", 'c');
-    cmd.addSlider( cmdSize, 20, 80 );
-    cmd.addSlider( ease, 1/600f, 1/60f );
+    cmd.addLabel(1, 1, "Size:", 'c');
+    cmd.addSlider( 2, 1, cmdSize, 20, 80 );
+    cmd.addLabel(3, 1, "Ease:", 'c');
+    cmd.addSlider( 4, 1, ease, 1/600f, 1/60f );
     
-    stpPlayer = new number( 0 );
-    stp = new UISet( 12, 9, 13, 1, 0.8 );
+    totalPlayers = new number( 2 );
+    stp = new UISet( 12, 9, 13, 0.95, 0.8 );
     stp.setScheme( #FC9C00,  30);
-    cmd.beginRow( 0, 1 );
-    for( int i = 0; i < playerCount.n; i++ ){
-      stp.addNumSet( "P"+str(i+1), 'c', stpPlayer, i );
+    stp.beginRow( 0, 1 );
+    for( int i = 2; i <= 4; i++ ){
+      stp.addNumSet( str(i)+" Players", 'c', totalPlayers, i );
     }
     
-    til = new UISet( 12, 9, 13, 1, 0.8 );
+    til = new UISet( 12, 9, 13, 0.95, 0.8 );
     til.setScheme( #FC9C00,  30);
     
-    wallWidth = new Number( 8 );
-    wal = new UISet( 12, 9, 13, 1, 0.8 );
+    wallWidth = new number( 8 );
+    wal = new UISet( 12, 9, 13, 0.95, 0.8 );
     wal.setScheme( #FC9C00,  30);
-    wal = addSlider( 0, 1, wallWidth, 2, 64 );
+    wal.addSlider( 0, 1, wallWidth, 2, 64 );
     
     ui.addCharSet(8, 0, "Done", 'c', moment, 'm');
   }
@@ -55,84 +73,206 @@ class Editor{
   void exe(){
     
     background(230);
+    
+      for( float y = header+yo; y < height; y += tileEdge){ // GRID
+        line(0, y, width, y);
+      }
+      for( float x = xo; x < width; x += tileEdge){         // GRID
+        line(x, header, x, height);
+      }
       
+      strokeWeight(5);
+      for( int a = 0; a < i.size(); a++ ){                  //WALLS
+        line(i.get(a).x, i.get(a).y, f.get(a).x, f.get(a).y);
+      }
+      strokeWeight(1);
+      
+      switch(int(totalPlayers.n)){
+        case 2:
+        for( int a = 0; a < stpts2.size(); a++ ){        // starting points
+          fill(255);
+          rect(stpts2.get(a).x - 10, stpts2.get(a).y - 10, 20, 20);
+          fill(0);
+          text("P"+str(a+1), stpts2.get(a).x - 9, stpts2.get(a).y - 10 );
+        }
+        break;
+        case 3:
+        for( int a = 0; a < stpts3.size(); a++ ){       
+          fill(255);
+          rect(stpts3.get(a).x - 10, stpts3.get(a).y - 10, 20, 20);
+          fill(0);
+          text("P"+str(a+1), stpts3.get(a).x - 9, stpts3.get(a).y - 10 );
+        }
+        break;
+        case 4:
+        for( int a = 0; a < stpts4.size(); a++ ){       
+          fill(255);
+          rect(stpts4.get(a).x - 10, stpts4.get(a).y - 10, 20, 20);
+          fill(0);
+          text("P"+str(a+1), stpts4.get(a).x - 9, stpts4.get(a).y - 10 );
+        }
+        break;
+      }
+      
+      
+      /*
       for(int i=0; i<10; i++){
         if(cmds.get(i).active){
           cmds.get(i).go();
         }
       }
-      
+      */
       world.step(); 
       world.draw();
       
+      ui.exe();
       
-      if(makingCmds){                  //criando commands
-        if(wait>0){wait--;}                           //este wait eh para se certificar de que, quando voce seleciona outro tipo de command, 
-        float radius = 1.25*sqrt(2)*Osize/2f;         //voce nao acidentalmente coloca um command em baixo daquela janelinha de selecao, entao ele nao deixa criar por [wait] frames.
-        if((mouseY > 50+radius)&&(mouseY < height-radius)&&(mouseX > radius)&&(mouseX < width-radius)){
-        fill(255);
-        ellipse(mouseX, mouseY, 1.25*sqrt(2)*Osize, 1.25*sqrt(2)*Osize);
-        ellipse(mouseX, mouseY, sqrt(2)*Osize, sqrt(2)*Osize);
-        rect(mouseX, mouseY, Osize, Osize);
-        }
-        
-        textFont(small, 22);            //seletor de tipo
-        if(settingType){fill(210);}
-        else if(mouseX>135 && mouseX<225 && mouseY>11 && mouseY<39){fill(190);}
-        else {fill(150);}
-        rect(180, 25, 90, 28);
-        fill(255);text("type:  "+Otype, 156, 32);
-        if(settingType){
-          fill(160);
-          rect(180, 123, 90, 168);
-          fill(0);
-          text("a", 175, 60); text("b", 175, 88); text("c", 175, 116); text("d", 175, 144); text("s", 175, 172); text("w", 174, 199);
-          line(135, 67, 225, 67); line(135, 95, 225, 95); line(135, 123, 225, 123); line(135, 151, 225, 151); line(135, 179, 225, 179);
-        }
-        
-        fill(150);                 //slider de tamanho
-        rect(300, 25, 130, 28);
-        fill(255);text("size:", 241, 32);
-        fill(160);rect(317, 25, 86, 16);
-        fill(170);rect(map(Osize, 20, 80, 274, 360), 25, 8, 20);
-        if(settingSize){
-          Osize = map(mouseX, 274, 360, 20, 80);
-          Osize = constrain(Osize, 20, 80);
-        }
-        
-        fill(150);                  //slider de facilidade (ease)
-        rect(440, 25, 130, 28);
-        fill(255);text("ease:", 378, 32);
-        fill(160);rect(458, 25, 86, 16);
-        fill(170);rect(map(Oease, 1/600f, 1/60f, 415, 501), 25, 8, 20);
-        if(settingEase){
-          Oease = map(mouseX, 415, 501, 1/600f, 1/60f);
-          Oease = constrain(Oease, 1/600f, 1/60f);
-        }
-        
-        if(Otype == 'b' || Otype == 'c' || Otype == 'd'){       //slider de taxa de pontuacao, soh eh ativo nos tipos relevantes
-          fill(150);
-          rect(562.5, 25, 95, 28);
-          fill(255);text("rate:", 520, 32);
-          fill(160);rect(580, 25, 50, 16);
-          fill(170);rect(map(OscoreRate, 1/180f, 5/60f, 555, 605), 25, 8, 20);
-          if(settingScoreRate){
-            OscoreRate = map(mouseX, 555, 605, 1/180f, 5/60f );
-            OscoreRate = constrain(OscoreRate, 1/180f, 5/60f);
+       float mX = xo + tileRad * round((mouseX - xo)/tileRad);
+       float mY = header + yo + tileRad * round((mouseY - header - yo)/tileRad);
+      
+      switch( action.l ){//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|
+        case 'c': ///|\\|//|\\|//|\\|//|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|
+          cmd.exe();
+          
+          
+          if( pushed ){
+            if( !mousePressed ){
+              tempCmds.add( new CommandPt(cmdType.l, mX, mY, cmdSize.n, ease.n, 0) );
+              pushed = false;
+            }
           }
-        }
+          else{
+            if ( mousePressed ){
+               pushed = true;
+            }
+          }
+          
+          if(mY > header){
+            draw_cmd(mX, mY, cmdSize.n);
+          }
+          break;//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
+        case 'p':////|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\   
+          stp.exe();
+          
+          if(pushed){
+            if( !mousePressed  && mouseY > header){
+              switch(int(totalPlayers.n)){
+                case 2:
+                if( stpts2.size() < 2 ) stpts2.add(new PVector(mX, mY));
+                break;
+                case 3:
+                if( stpts3.size() < 3 ) stpts3.add(new PVector(mX, mY));
+                break;
+                case 4:
+                if( stpts4.size() < 4 ) stpts4.add(new PVector(mX, mY));
+                break;
+              }
+              pushed = false;
+            }
+          }
+          else{
+            if( mousePressed && mouseY > header){
+              boolean drag = false;
+              switch(int(totalPlayers.n)){
+                case 2:
+                for( int a = 0; a < stpts2.size(); a++ ){
+                  if( stpts2.get(a).x == mX && stpts2.get(a).y == mY ){
+                    draggingStp = true;
+                    stpSelected = a;
+                    drag = true;
+                  }
+                }
+                break;
+                case 3:
+                for( int a = 0; a < stpts3.size(); a++ ){
+                  if( stpts3.get(a).x == mX && stpts3.get(a).y == mY ){
+                    draggingStp = true;
+                    stpSelected = a;
+                    drag = true;
+                  }
+                }
+                break;
+                case 4:
+                for( int a = 0; a < stpts4.size(); a++ ){
+                  if( stpts4.get(a).x == mX && stpts4.get(a).y == mY ){
+                    draggingStp = true;
+                    stpSelected = a;
+                    drag = true;
+                  }
+                }
+                break;
+              }
+              if( !drag ) pushed = true;
+            }
+          }
+          
+          if( !mousePressed ) draggingStp = false;
+          
+          if(draggingStp){
+            switch(int(totalPlayers.n)){
+              case 2:
+              stpts2.get(stpSelected).x = mX;
+              stpts2.get(stpSelected).y = mY;
+              break;
+              case 3:
+              stpts3.get(stpSelected).x = mX;
+              stpts3.get(stpSelected).y = mY;
+              break;
+              case 4:
+              stpts4.get(stpSelected).x = mX;
+              stpts4.get(stpSelected).y = mY;
+              break;
+            }
+          }
+        break;   //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
+        case 't'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
+          til.exe();
         
+        break;   //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
+        case 'w'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\ 
+          wal.exe();
+          
+          if(creatingWall){
+            strokeWeight(5);
+            line(xi, yi, mX, mY);
+            strokeWeight(1);
+            if( mousePressed ){
+              pushed = true;
+            }
+            else{
+              if(pushed){
+                pushed = false;
+                creatingWall = false;
+                i.add( new PVector( xi, yi ) );
+                f.add( new PVector( mX, mY ) );
+              }
+            }
+          }
+          else{
+            if( mousePressed ){
+              pushed = true;
+            }
+            else{
+              if(pushed){
+                pushed = false;
+                creatingWall = true;
+                xi = mX;
+                yi = mY;
+              } 
+            }
+          }
+          ellipse( mX, mY, 4, 4 ); // CURSOR
+          break;
       }
-      else if(creatingWall){
-        strokeWeight(5);  //faz aquela linha preta pra vizualizar a parede que voce esta criando. a criacao em si acontece no mousePressed()
-        line(xi, yi, mouseX, mouseY);
-        strokeWeight(1);
-      }
-      
-      fill(150);
-      rect(width-25, 25, 30, 30);
-      rect(width-65, 25, 30, 30);
     
   }
   
+}
+
+void draw_cmd( float x, float y, float s ){
+  float radius = sqrt(2)*s;         
+  fill(255);
+  ellipse(x, y, 1.25*radius, 1.25*radius);
+  ellipse(x, y, radius, radius);
+  rect(x-(s/2f), y-(s/2f), s, s);
 }

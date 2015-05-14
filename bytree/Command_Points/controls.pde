@@ -46,9 +46,4 @@ void mousePressed(){
 
 void mouseReleased(){
 
-  if(moment.l == 'e'){
-    mapEditor.settingSize=false;
-    mapEditor.settingEase=false;
-    mapEditor.settingScoreRate=false;
-  }
 }

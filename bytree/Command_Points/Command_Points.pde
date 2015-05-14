@@ -4,7 +4,7 @@ FWorld world; // variavel 'mundo' do fisica.
 
 boolean up, down, left, right, w, a, s, d;
 
-
+float header;
 UISet MainMenu, Settings;
 
 Editor mapEditor;
@@ -48,7 +48,8 @@ void setup(){
   init_MainMenu_UI();
   init_Options_UI();
   init_sides( 30 );
-  
+  init_fisica_world();
+  mapEditor = new Editor();
 
 }
 void draw(){
@@ -62,7 +63,7 @@ void draw(){
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'f'://PRE-GAME/|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
       
-      Init_Fisica();
+      init_fisica_players();
       
       
       /*
