@@ -6,13 +6,16 @@ class Editor{
   int stpSelected;
   ArrayList<PVector>i; // temp storage for walls
   ArrayList<PVector>f;
+  FloatList wallWidths;
   ArrayList<PVector>stpts2; // temp storage for starting points
   ArrayList<PVector>stpts3;
   ArrayList<PVector>stpts4;
   ArrayList<CommandPt> tempCmds;
   UISet ui, cmd, stp, til, wal;
-  letter action, cmdType;
-  number cmdSize, ease, wallWidth, totalPlayers;
+  Slider scoreRateSlider;
+  letter action, type;
+  number size, total, scoreRate, wallWidth, totalPlayers;
+  bool delete;
   
   Editor(){
     tileEdge = 80;
@@ -21,10 +24,13 @@ class Editor{
     yo = (tileEdge*(((height-header)/tileEdge) - floor((height-header)/tileEdge)))/2f;
     i = new ArrayList();
     f = new ArrayList();
+    wallWidths = new FloatList();
     stpts2 = new ArrayList();
     stpts3 = new ArrayList();
     stpts4 = new ArrayList();
     tempCmds = new ArrayList();
+    
+    delete = new bool();
     
     action = new letter('c');
     ui = new UISet( 12, 9, 13, 1, 0.8 );
@@ -35,21 +41,25 @@ class Editor{
     ui.addCharSet("Tiles", 'c', action, 't');
     ui.addCharSet("Walls", 'c', action, 'w');
     
-    cmdType = new letter('a');
-    cmdSize = new number( 80 );
-    ease = new number( 2 );
+    type = new letter('a');
+    size = new number( 80 );
+    total = new number( 2 );
     cmd = new UISet( 12, 9, 13, 0.95, 0.8 );
     cmd.setScheme( #FC9C00,  30);
-    cmd.addDropDown( 0, 1, "cmdPt type", 'c', cmdType );
-    cmd.set.get(0).add('a', "victory", 'c');
-    cmd.set.get(0).add('a', "score", 'c');
-    cmd.set.get(0).add('s', "Speed", 'c');
+    cmd.addDropDown( 0, 1, "cmdPt type", 'c', type );
+    cmd.set.get(0).add('v', "victory", 'c');
+    cmd.set.get(0).add('s', "score", 'c');
+    cmd.set.get(0).add('f', "Speed", 'c');
     cmd.set.get(0).add('w', "Weight", 'c');
     cmd.set.get(0).add('l', "Lock", 'c');
     cmd.addLabel(1, 1, "Size:", 'c');
-    cmd.addSlider( 2, 1, cmdSize, 20, 80 );
-    cmd.addLabel(3, 1, "Ease:", 'c');
-    cmd.addSlider( 4, 1, ease, 1/600f, 1/60f );
+    cmd.addSlider( 2, 1, size, 60, 100 );
+    cmd.addLabel(3, 1, "Total:", 'c');
+    cmd.addSlider( 4, 1, total, 1/600f, 1/60f );
+    cmd.addToggle(8, 1, "delete", 'c', delete);
+    scoreRate = new number( 10 );
+    float[]d = cmd.returnDimensions( 5, 1 );
+    scoreRateSlider = new Slider( d[0], d[1], d[2], d[3], scoreRate, 2, 50 );
     
     totalPlayers = new number( 2 );
     stp = new UISet( 12, 9, 13, 0.95, 0.8 );
@@ -66,6 +76,7 @@ class Editor{
     wal = new UISet( 12, 9, 13, 0.95, 0.8 );
     wal.setScheme( #FC9C00,  30);
     wal.addSlider( 0, 1, wallWidth, 2, 64 );
+    wal.addToggle(8, 1, "delete", 'c', delete);
     
     ui.addCharSet(8, 0, "Done", 'c', moment, 'm');
   }
@@ -81,8 +92,12 @@ class Editor{
         line(x, header, x, height);
       }
       
-      strokeWeight(5);
+      for( int a = 0; a < tempCmds.size(); a++ ){           //CMDS
+         draw_cmd( tempCmds.get(a).x, tempCmds.get(a).y, tempCmds.get(a).size );
+      }
+      
       for( int a = 0; a < i.size(); a++ ){                  //WALLS
+        strokeWeight(wallWidths.get(a));            
         line(i.get(a).x, i.get(a).y, f.get(a).x, f.get(a).y);
       }
       strokeWeight(1);
@@ -133,22 +148,43 @@ class Editor{
       switch( action.l ){//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|
         case 'c': ///|\\|//|\\|//|\\|//|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|
           cmd.exe();
+          if( type.l == 's' ) scoreRateSlider.exe(cmd.CS);
           
-          
-          if( pushed ){
-            if( !mousePressed ){
-              tempCmds.add( new CommandPt(cmdType.l, mX, mY, cmdSize.n, ease.n, 0) );
-              pushed = false;
+          if( delete.b ){
+            if( mousePressed ){
+              float sqrt2o2 = sqrt(2)*0.625;
+              for( int a = 0; a < tempCmds.size(); a++ ){
+                if( dist( mouseX, mouseY, tempCmds.get(a).x, tempCmds.get(a).y ) < tempCmds.get(a).size * sqrt2o2 ){
+                  tempCmds.remove(a);
+                }
+              }
             }
           }
           else{
-            if ( mousePressed ){
-               pushed = true;
+            if( pushed ){
+              if( !mousePressed  && mouseY > header){
+                boolean same = false;
+                for( int a = 0; a < tempCmds.size(); a++ ){ 
+                  if( mX == tempCmds.get(a).x && mY == tempCmds.get(a).y ){
+                    same = true;
+                    break;
+                  }
+                }
+                if( ! same ){
+                  tempCmds.add( new CommandPt(type.l, mX, mY, size.n, total.n, 0) );
+                  pushed = false;
+                }
+              }
             }
-          }
-          
-          if(mY > header){
-            draw_cmd(mX, mY, cmdSize.n);
+            else{
+              if ( mousePressed  && mouseY > header){
+                 pushed = true;
+              }
+            }
+            
+            if(mY > header){
+              draw_cmd(mX, mY, size.n);
+            }
           }
           break;//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
         case 'p':////|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\   
@@ -232,36 +268,53 @@ class Editor{
         case 'w'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\ 
           wal.exe();
           
-          if(creatingWall){
-            strokeWeight(5);
-            line(xi, yi, mX, mY);
-            strokeWeight(1);
+          if( delete.b ){
             if( mousePressed ){
-              pushed = true;
-            }
-            else{
-              if(pushed){
-                pushed = false;
-                creatingWall = false;
-                i.add( new PVector( xi, yi ) );
-                f.add( new PVector( mX, mY ) );
+              for( int a = 0; a < i.size(); a++ ){
+                if( mX == i.get(a).x && mY == i.get(a).y ){
+                  i.remove(a);
+                  f.remove(a);
+                }
+                else if( mX == f.get(a).x && mY == f.get(a).y ){
+                  i.remove(a);
+                  f.remove(a);
+                }
               }
             }
           }
           else{
-            if( mousePressed ){
-              pushed = true;
+            if(creatingWall){
+              strokeWeight(wallWidth.n);
+              line(xi, yi, mX, mY);
+              strokeWeight(1);
+              if( mousePressed ){
+                pushed = true;
+              }
+              else{
+                if(pushed  && mouseY > header){
+                  pushed = false;
+                  creatingWall = false;
+                  i.add( new PVector( xi, yi ) );
+                  f.add( new PVector( mX, mY ) );
+                  wallWidths.append( wallWidth.n );
+                }
+              }
             }
             else{
-              if(pushed){
-                pushed = false;
-                creatingWall = true;
-                xi = mX;
-                yi = mY;
-              } 
+              if( mousePressed  && mouseY > header){
+                pushed = true;
+              }
+              else{
+                if(pushed && mouseY > header){
+                  pushed = false;
+                  creatingWall = true;
+                  xi = mX;
+                  yi = mY;
+                } 
+              }
             }
           }
-          ellipse( mX, mY, 4, 4 ); // CURSOR
+          ellipse( mX, mY, wallWidth.n, wallWidth.n ); // CURSOR
           break;
       }
     

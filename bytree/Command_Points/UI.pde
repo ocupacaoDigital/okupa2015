@@ -139,11 +139,29 @@ class UISet{
       line(margin, y, width - margin, y);
     }
   }
+  /* cannot be declared static; static methods can only be declared in a static or top level type
+  static float[] returnDimensions( int l, int c, float m, float l, float c, float h, float v ){
+    float[] d = new float[4];
+    d[2] = (width - 2 * m)/l;
+    d[3] = (height - 2 * m)/c;
+    d[0] = m + (l * d[2]) + ( ( (ceil(h) - h) * d[2] ) / 2f );
+    d[1] = m + (c * d[3]) + ( ( (ceil(v) - v ) * d[3]) / 2f );    
+    return d;
+  }
+  */
+  float[] returnDimensions( int l, int c ){
+    float[] d = new float[4];
+    d[0] = margin + (l * line) + ( ( (ceil(H_percent) - H_percent) * line ) / 2f );
+    d[1] = margin + (c * column) + ( ( (ceil(V_percent) - V_percent ) * column) / 2f );
+    d[2] = line * H_percent;
+    d[3] = column * V_percent;    
+    return d;
+  }
   
   void exe(){
     textAlign(LEFT, TOP);
     for(int i = 0; i < set.size(); i++){
-      set.get(i).exe(CS.dimmer, CS.dim, CS.bright, CS.brighter);
+      set.get(i).exe(CS);
     }
     for(int i = 0; i < labels.size(); i++){
       labels.get(i).display();
@@ -472,7 +490,7 @@ class UIElement {
   void Rect(){
     rect(x, y, w, h);
   }
-  void exe(color dimmer, color dim, color bright, color brighter){}
+  void exe(ColorScheme CS){}
   void add(char set, String label, char pos){}
   void setColor( color c ){}
 }
@@ -488,22 +506,22 @@ class ToggleButton extends UIElement {
     label = new Static_String_Label( label_, p, x, y, w, h );
     incumbency = i;
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
+  void exe(ColorScheme CS){
     if ( mouse_over() ) {
-      fill(bright);
+      fill(CS.bright);
       if (mousePressed) {
         pushed = true;
       }
     }
     else {
-      fill(dim);
+      fill(CS.dim);
     }
     if (!mousePressed && pushed) {
       incumbency.b = !incumbency.b;
       pushed = false;
     }
     if (incumbency.b) {
-      fill(brighter);
+      fill(CS.brighter);
     }
     super.Rect();
     super.label.display();
@@ -521,22 +539,22 @@ class NumSetButton extends UIElement {
     set = s;
     label = new Static_String_Label(label_, p, x, y, w, h);
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
+  void exe(ColorScheme CS){
     if ( mouse_over() ) {
-      fill(bright);
+      fill(CS.bright);
       if (mousePressed) {
         pushed = true;
       }
     }
     else {
-      fill(dim);
+      fill(CS.dim);
     }
     if (!mousePressed && pushed) {
       incumbency.n = set;
       pushed = false;
     }
     if (this.on()) {
-      fill(brighter);
+      fill(CS.brighter);
     }
     super.Rect();
     label.display();
@@ -560,22 +578,22 @@ class CharSetButton extends UIElement {
     set = s;
     label = new Static_String_Label(label_, p, x, y, w, h);
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
+  void exe(ColorScheme CS){
     if ( mouse_over() ) {
-      fill(bright);
+      fill(CS.bright);
       if (mousePressed) {
         pushed = true;
       }
     }
     else {
-      fill(dim);
+      fill(CS.dim);
     }
     if (!mousePressed && pushed) {
       incumbency.l = set;
       pushed = false;
     }
     if (this.on()) {
-      fill(brighter);
+      fill(CS.brighter);
     }
     super.Rect();
     super.label.display();
@@ -603,14 +621,14 @@ class DropDown extends UIElement{
   void add(char set, String label, char pos){
     b.add( new CharSetButton(x, y + ( (b.size()+1) * h ), w, h, label, pos, incumbency, set) );
   }
-  void exe(color dimmer, color dim, color bright, color brighter){
+  void exe(ColorScheme CS){
     if(mouse_over()){
-      fill(bright);
+      fill(CS.bright);
       if(mousePressed){
         pushed = true; 
       }
     }
-    else{ fill(dim);}
+    else{ fill(CS.dim);}
     if(!mousePressed && pushed){
       open = !open;
       pushed = false;
@@ -618,12 +636,12 @@ class DropDown extends UIElement{
     if(open){
       for(int i = 0; i < b.size(); i++){
         if(!mousePressed &&  b.get(i).pushed )open = false; 
-        b.get(i).exe(dimmer, dim, bright, brighter);
+        b.get(i).exe(CS);
       }
-      fill(bright);
+      fill(CS.bright);
     }
     
-    if( on() ) fill(brighter); 
+    if( on() ) fill(CS.brighter); 
     
     super.Rect();
     super.label.display();
@@ -660,15 +678,15 @@ class NumAddButton extends UIElement {
     this.step = step;
     warp = false;
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
+  void exe(ColorScheme CS){
     if ( super.mouse_over() ) {
-      fill(bright);
+      fill(CS.bright);
       if (mousePressed) {
         pushed = true;
       }
     }
     else { 
-      fill(dim);
+      fill(CS.dim);
     }
     if (!mousePressed && pushed) {
       if (warp) {
@@ -681,7 +699,7 @@ class NumAddButton extends UIElement {
       }
       incumbency.n += step;
       
-      fill(brighter);
+      fill(CS.brighter);
       pushed = false;
     }
     super.Rect();
@@ -714,11 +732,11 @@ class PlusMinus extends UIElement{
     minus = new NumAddButton(x, y, h, h, i, -step);
     label = new Dynamic_Number_Label( i, 'm', x, y, w, h );
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
-    plus.exe(dimmer, dim, bright, brighter);
-    minus.exe(dimmer, dim, bright, brighter);    
+  void exe(ColorScheme CS){
+    plus.exe(CS);
+    minus.exe(CS);    
     //label.s = (integer)? str(int(incumbency.n)) : str(incumbency.n);
-    fill(dimmer);
+    fill(CS.dimmer);
     super.Rect();
     super.label.display();
   }
@@ -735,19 +753,19 @@ class Slider extends UIElement {
     this.min = min;
     this.max = max;
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
-    fill(dimmer);
+  void exe(ColorScheme CS){
+    fill(CS.dimmer);
     super.Rect();
     //super.label.display();
     if ( super.mouse_over() ) {
       if (mousePressed) {
         incumbency.n = map(mouseX, x+4, x+w-4, min, max);
         incumbency.n = constrain(incumbency.n, min, max);
-        fill(brighter);
+        fill(CS.brighter);
       }
-      fill(bright);
+      fill(CS.bright);
     }
-    else{fill(dim);}
+    else{fill(CS.dim);}
     rect(map(constrain(incumbency.n, min, max), min, max, x+4, x+w-4)-4, y-1, 8, h+2);
   }
 }
@@ -779,8 +797,8 @@ class subSlider extends UIElement {
     }
     if(dragging) n = map(constrain(mouseY, y+4, y+h-4), y+h-4, y+4, min, max);
   }
-  void display(color dimmer, color dim, color bright, color brighter){
-    fill(brighter);
+  void display(ColorScheme CS){
+    fill(CS.brighter);
     rect(x, map(n, min, max, y+h-6, y+3)-3, w, 6);
   }
 }
@@ -811,7 +829,7 @@ class ColorSelector extends UIElement {
     green.n = green(c);
     blue.n = blue(c);
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
+  void exe(ColorScheme CS){
     red.exe();
     green.exe();
     blue.exe();
@@ -839,9 +857,9 @@ class ColorSelector extends UIElement {
     }
     x -= 2*(bw+margin);
     stroke(0);
-    red.display(dimmer, dim, bright, brighter);
-    green.display(dimmer, dim, bright, brighter);
-    blue.display(dimmer, dim, bright, brighter);
+    red.display(CS);
+    green.display(CS);
+    blue.display(CS);
     fill(incumbency.p);
     rect(x + margin, y + bh + 3*margin, w - 2*margin, (w/3f) -2*margin); //+ 7.5*margin
   }
@@ -886,19 +904,19 @@ class Yanker extends UIElement {
       else return pow(a, exp);
     }
   }
-  void exe(color dimmer, color dim, color bright, color brighter) {
-    fill(dim);
+  void exe(ColorScheme CS){
+    fill(CS.dim);
     super.Rect();
     image(lines, x, y);
     
     if ( super.mouse_over() ) {
-      fill(bright);
+      fill(CS.bright);
       if (mousePressed) held = true;
     }
     if(!mousePressed) held = false;
     
     if(held){
-      fill(brighter);
+      fill(CS.brighter);
       X = map(mouseX, x+4, x+w-4, -domain, domain);
       incumbency.n = constrain(incumbency.n + exp_term(X) + X*coeff, min, max);
     }

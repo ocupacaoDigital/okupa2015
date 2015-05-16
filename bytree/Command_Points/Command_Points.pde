@@ -43,6 +43,7 @@ void setup(){
   colorMode(RGB);
   textsize = 16;
   textSize(textsize);
+  strokeCap(SQUARE);
   
   init_game();
   init_MainMenu_UI();

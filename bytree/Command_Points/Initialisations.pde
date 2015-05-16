@@ -20,8 +20,22 @@ void init_fisica_players(){
     p[i].setDamping(1.5);
     p[i].setFriction(0.9);
     
-    float x = currentMap.startingLocations.get(i).x;
-    float y = currentMap.startingLocations.get(i).y;
+    float x = 0;
+    float y = 0;
+    switch(int(playerCount.n)){
+      case 2:
+        x = currentMap.startingLocations2[i].x;
+        y = currentMap.startingLocations2[i].y;
+        break;
+      case 3:
+        x = currentMap.startingLocations3[i].x;
+        y = currentMap.startingLocations3[i].y;
+        break;
+      case 4:
+        x = currentMap.startingLocations4[i].x;
+        y = currentMap.startingLocations4[i].y;
+        break;
+    }
     float l = 0;
     switch( players.get(i).shape ){
       case 't': 
