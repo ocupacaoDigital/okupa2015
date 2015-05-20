@@ -51,10 +51,9 @@ void setup(){
   init_sides( 30 );
   init_fisica_world();
   mapEditor = new Editor();
-
 }
 void draw(){
-  //println(frameRate);
+  println(frameRate);
   background(255);
   switch( moment.l ){ //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
     case 'm'://MAIN MENU|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
@@ -66,6 +65,7 @@ void draw(){
       
       init_fisica_players();
       
+      currentMap.initWalls();
       
       /*
       scoreBar=(3/5f)*width;
@@ -81,80 +81,25 @@ void draw(){
 
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'g'://GAME\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
-      /*
-      background(230);
-      fill(130);
-      rect(width/2f,25,width, 50);
-  
-      if(conquer){      //conquer eh o modo de jogo onde se tem que capturar todos os commands tipo "A"
-        fill(R1, G1, B1);
-        rect( (width/5f)+(p1Ownage/2f), 25, p1Ownage, 30);
-        fill(255);
-        rect((width/5f)+p1Ownage+((scoreBar-p1Ownage-p2Ownage)/2f), 25, scoreBar-p1Ownage-p2Ownage, 30);
-        fill(R2, G2, B2);
-        rect( (width*(4/5f))-(p2Ownage/2f), 25, p2Ownage, 30);
-        
-        fill(R1, G1, B1);
-        text(p1Wins, 20, 40);
-        fill(R2, G2, B2);
-        text(p2Wins, width-20-textWidth("0"), 40);
-        if(p1Ownage == scoreBar){
-          p1Wins++;
-          for(int i=0; i<10; i++){
-            if(cmds[i].active){
-              cmds[i].setOwner(0);
-            }
-            p1.setWidth(18);
-            p1.setHeight(18);
-            p2.setWidth(18);
-            p2.setHeight(18);
-          }
-          p1.setPosition(width/5f, height/2f);
-          p2.setPosition((4/5f)*width, (height/2f));
-        }
-        else if(p2Ownage == scoreBar){
-          p2Wins++;
-          for(int i=0; i<10; i++){
-            if(cmds[i].active){
-              cmds[i].setOwner(0);
-            }
-            p1.setWidth(18);
-            p1.setHeight(18);
-            p2.setWidth(18);
-            p2.setHeight(18);
-          }
-          p1.setPosition(width/5f, height/2f);
-          p2.setPosition((4/5f)*width, (height/2f));
-        }
-        p1Ownage=0;p2Ownage=0;
-        for(int i=0; i<10; i++){
-          if(cmds[i].type() == 'a'){
-            if(cmds[i].owner() < 0){
-              p1Ownage += map(cmds[i].owner(), 0, -50, 0, scoreBar/Acmds);
-            }
-            else if(cmds[i].owner() > 0){
-              p2Ownage += map(cmds[i].owner(), 0, 50, 0, scoreBar/Acmds);
-            }
-          }
-        }
-        
+      
+      currentMap.exe();
+      
+      for(int i = 0; i < players.size(); i++){
+        players.get(i).exe(i);
       }
       
-      
-      p1.addForce(wasdControls(p1acc).x, wasdControls(p1acc).y);  //effetuando os controles
-      p2.addForce(arrowControls(p2acc).x, arrowControls(p2acc).y);
-      
-      //p1.setVelocity(wasdControls(100).x, wasdControls(100).y);  //controle sem inercia
-      //p2.setVelocity(arrowControls(100).x, arrowControls(100).y);
-  
-      for(int i=0; i<10; i++){  //rodando os commands
-        if(cmds[i].active){
-          cmds[i].go();
-        }
+      if( players.get(0).frozen == 0 ){
+        PVector wasd = wasdControls(players.get(0).acc);
+        p[0].addForce(wasd.x, wasd.y);
       }
-      world.step(); //rodando o fisica
+      if( players.get(1).frozen == 0 ){
+        PVector arrows = arrowControls(players.get(1).acc);   
+        p[1].addForce(arrows.x, arrows.y);
+      }
+      
+      world.step();
       world.draw();
-      */
+      
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'e'://EDITOR|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
       

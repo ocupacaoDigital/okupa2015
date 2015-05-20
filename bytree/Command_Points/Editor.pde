@@ -1,5 +1,6 @@
 class Editor{
   float xo, yo, tileEdge, tileRad;
+  int L, C;
   float xi, yi, xf, yf; 
   PImage CmdPtIcon, WallsIcon, TilesIcon;
   boolean creatingWall, pushed, draggingStp, deleting;
@@ -7,30 +8,52 @@ class Editor{
   ArrayList<PVector>i; // temp storage for walls
   ArrayList<PVector>f;
   FloatList wallWidths;
+  Tile[] templates;
+  Tile[][] tiles;
   ArrayList<PVector>stpts2; // temp storage for starting points
   ArrayList<PVector>stpts3;
   ArrayList<PVector>stpts4;
   ArrayList<CommandPt> tempCmds;
   UISet ui, cmd, stp, til, wal;
   Slider scoreRateSlider;
-  letter action, type;
+  letter action, type, tileType;
   number size, total, scoreRate, wallWidth, totalPlayers;
-  bool delete;
+  bool delete, done;
   
+  Editor(int o){}
   Editor(){
-    tileEdge = 80;
+    tileEdge = 70;
     tileRad = tileEdge/2f;
     xo = (tileEdge*((width/tileEdge) - floor(width/tileEdge)))/2f;
     yo = (tileEdge*(((height-header)/tileEdge) - floor((height-header)/tileEdge)))/2f;
+    
     i = new ArrayList();
     f = new ArrayList();
     wallWidths = new FloatList();
+    
+    templates = new Tile[5];
+    templates[0] = new Tile('f', #989079, 1.5);
+    templates[1] = new Tile('f', #C2E8E8, 0);
+    templates[2] = new Tile('f', #C1935A, 5);
+    templates[3] = new Tile('i', #69E064, 1.5);
+    templates[4] = new Tile('t', #F28D20, 1.5);
+    L = ceil(width/tileEdge)+1;
+    C = ceil((height-header)/tileEdge)+1;
+    tiles = new Tile[L][C];
+    for(int x = 0; x < L; x++){
+      for(int y = 0; y < C; y++){
+        tiles[x][y] = templates[0].get();
+      }
+    }
+    
     stpts2 = new ArrayList();
     stpts3 = new ArrayList();
     stpts4 = new ArrayList();
+    
     tempCmds = new ArrayList();
     
     delete = new bool();
+    done = new bool();
     
     action = new letter('c');
     ui = new UISet( 12, 9, 13, 1, 0.8 );
@@ -40,10 +63,12 @@ class Editor{
     ui.addCharSet("Starting Positions", 'c', action, 'p');
     ui.addCharSet("Tiles", 'c', action, 't');
     ui.addCharSet("Walls", 'c', action, 'w');
+    //ui.addCharSet(8, 0, "Done", 'c', moment, 'm');
+    ui.addToggle(8, 0, "Done", 'c', done);
     
     type = new letter('a');
     size = new number( 80 );
-    total = new number( 2 );
+    total = new number( 300 );
     cmd = new UISet( 12, 9, 13, 0.95, 0.8 );
     cmd.setScheme( #FC9C00,  30);
     cmd.addDropDown( 0, 1, "cmdPt type", 'c', type );
@@ -55,7 +80,7 @@ class Editor{
     cmd.addLabel(1, 1, "Size:", 'c');
     cmd.addSlider( 2, 1, size, 60, 100 );
     cmd.addLabel(3, 1, "Total:", 'c');
-    cmd.addSlider( 4, 1, total, 1/600f, 1/60f );
+    cmd.addSlider( 4, 1, total, 100, 500 );
     cmd.addToggle(8, 1, "delete", 'c', delete);
     scoreRate = new number( 10 );
     float[]d = cmd.returnDimensions( 5, 1 );
@@ -69,8 +94,15 @@ class Editor{
       stp.addNumSet( str(i)+" Players", 'c', totalPlayers, i );
     }
     
+    tileType = new letter('c');
     til = new UISet( 12, 9, 13, 0.95, 0.8 );
     til.setScheme( #FC9C00,  30);
+    til.beginRow(0, 1);
+    til.addCharSet("concrete", 'c', tileType, 'c' );
+    til.addCharSet("ice", 'c', tileType, 'i' );
+    til.addCharSet("mud", 'c', tileType, 'm' );
+    til.addCharSet("Item", 'c', tileType, 'b' );
+    til.addCharSet("Trap", 'c', tileType, 't' );
     
     wallWidth = new number( 8 );
     wal = new UISet( 12, 9, 13, 0.95, 0.8 );
@@ -78,72 +110,25 @@ class Editor{
     wal.addSlider( 0, 1, wallWidth, 2, 64 );
     wal.addToggle(8, 1, "delete", 'c', delete);
     
-    ui.addCharSet(8, 0, "Done", 'c', moment, 'm');
   }
   
-  void exe(){
-    
-    background(230);
-    
-      for( float y = header+yo; y < height; y += tileEdge){ // GRID
-        line(0, y, width, y);
-      }
-      for( float x = xo; x < width; x += tileEdge){         // GRID
-        line(x, header, x, height);
-      }
+  void exe(){//$S$S$S*$S$S$S$S$S$S$*S$S$S$S$S$S$S$S$S*$S$S$S$S$S$S$S$S$S*$S$S$S$S$S$S$S$S*$S$S$S$S$S$S$S$*S$S$S$S$S$S$S$S$S$S$S$S*$S$S$S$S$S$S$S$S$S$S$S$S$
       
-      for( int a = 0; a < tempCmds.size(); a++ ){           //CMDS
-         draw_cmd( tempCmds.get(a).x, tempCmds.get(a).y, tempCmds.get(a).size );
-      }
+      this.display();
       
-      for( int a = 0; a < i.size(); a++ ){                  //WALLS
-        strokeWeight(wallWidths.get(a));            
-        line(i.get(a).x, i.get(a).y, f.get(a).x, f.get(a).y);
-      }
-      strokeWeight(1);
-      
-      switch(int(totalPlayers.n)){
-        case 2:
-        for( int a = 0; a < stpts2.size(); a++ ){        // starting points
-          fill(255);
-          rect(stpts2.get(a).x - 10, stpts2.get(a).y - 10, 20, 20);
-          fill(0);
-          text("P"+str(a+1), stpts2.get(a).x - 9, stpts2.get(a).y - 10 );
-        }
-        break;
-        case 3:
-        for( int a = 0; a < stpts3.size(); a++ ){       
-          fill(255);
-          rect(stpts3.get(a).x - 10, stpts3.get(a).y - 10, 20, 20);
-          fill(0);
-          text("P"+str(a+1), stpts3.get(a).x - 9, stpts3.get(a).y - 10 );
-        }
-        break;
-        case 4:
-        for( int a = 0; a < stpts4.size(); a++ ){       
-          fill(255);
-          rect(stpts4.get(a).x - 10, stpts4.get(a).y - 10, 20, 20);
-          fill(0);
-          text("P"+str(a+1), stpts4.get(a).x - 9, stpts4.get(a).y - 10 );
-        }
-        break;
-      }
-      
-      
-      /*
-      for(int i=0; i<10; i++){
-        if(cmds.get(i).active){
-          cmds.get(i).go();
-        }
-      }
-      */
-      world.step(); 
-      world.draw();
+      fill(255);
+      rect(0, 0, width, header);
       
       ui.exe();
       
-       float mX = xo + tileRad * round((mouseX - xo)/tileRad);
-       float mY = header + yo + tileRad * round((mouseY - header - yo)/tileRad);
+      if( done.b ){
+        currentMap = new Map(tileEdge, tempCmds, tiles, i, f, wallWidths, stpts2, stpts3, stpts4);      
+        moment.l = 'm';
+        done.b = false;
+      }
+      
+     float mX = xo + tileRad * round((mouseX - xo)/tileRad);
+     float mY = header + yo + tileRad * round((mouseY - header - yo)/tileRad);
       
       switch( action.l ){//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|
         case 'c': ///|\\|//|\\|//|\\|//|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|
@@ -263,6 +248,19 @@ class Editor{
         break;   //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
         case 't'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
           til.exe();
+
+          if( mousePressed  && mouseY > header){
+            int x = floor((mouseX - xo)/tileEdge)+1;
+            int y = floor((mouseY - header - yo)/tileEdge)+1;
+            switch(tileType.l){
+              case 'c': tiles[x][y] = templates[0]; break; // concrete
+              case 'i': tiles[x][y] = templates[1]; break; // ice
+              case 'm': tiles[x][y] = templates[2]; break; // mud
+              case 'b': tiles[x][y] = templates[3]; break; // bonus
+              case 't': tiles[x][y] = templates[4]; break; // trap
+            }
+            pushed = false;
+          }
         
         break;   //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
         case 'w'://|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\ 
@@ -274,13 +272,17 @@ class Editor{
                 if( mX == i.get(a).x && mY == i.get(a).y ){
                   i.remove(a);
                   f.remove(a);
+                  wallWidths.remove(a);
                 }
                 else if( mX == f.get(a).x && mY == f.get(a).y ){
                   i.remove(a);
                   f.remove(a);
+                  wallWidths.remove(a);
                 }
               }
             }
+            fill(255, 0, 0);
+            ellipse( mX, mY, wallWidth.n, wallWidth.n ); // CURSOR
           }
           else{
             if(creatingWall){
@@ -313,13 +315,67 @@ class Editor{
                 } 
               }
             }
+            fill(0);
+            ellipse( mX, mY, wallWidth.n, wallWidth.n ); // CURSOR
           }
-          ellipse( mX, mY, wallWidth.n, wallWidth.n ); // CURSOR
-          break;
-      }
+          
+          break; //',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',
+      }//',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',',
     
   }
-  
+  void display(){
+    
+    for(int x = -1; x < L-1; x++){                        //TILES
+      for(int y = -1; y < C-1; y++){
+        fill( tiles[x+1][y+1].c );
+        rect( xo + (x * tileEdge), yo + header + (y * tileEdge), tileEdge, tileEdge);
+      }
+    }    
+    /*
+    for( float y = header+yo; y < height; y += tileEdge){ // GRID
+      line(0, y, width, y);
+    }
+    for( float x = xo; x < width; x += tileEdge){
+      line(x, header, x, height);
+    }
+    */
+    for( int a = 0; a < tempCmds.size(); a++ ){           //CMDS
+       draw_cmd( tempCmds.get(a).x, tempCmds.get(a).y, tempCmds.get(a).size );
+    }
+    
+    for( int a = 0; a < i.size(); a++ ){                  //WALLS
+      strokeWeight(wallWidths.get(a));            
+      line(i.get(a).x, i.get(a).y, f.get(a).x, f.get(a).y);
+    }
+    strokeWeight(1);
+    
+    switch(int(totalPlayers.n)){
+      case 2:
+      for( int a = 0; a < stpts2.size(); a++ ){        // starting points
+        fill(255);
+        rect(stpts2.get(a).x - 10, stpts2.get(a).y - 10, 20, 20);
+        fill(0);
+        text("P"+str(a+1), stpts2.get(a).x - 9, stpts2.get(a).y - 10 );
+      }
+      break;
+      case 3:
+      for( int a = 0; a < stpts3.size(); a++ ){       
+        fill(255);
+        rect(stpts3.get(a).x - 10, stpts3.get(a).y - 10, 20, 20);
+        fill(0);
+        text("P"+str(a+1), stpts3.get(a).x - 9, stpts3.get(a).y - 10 );
+      }
+      break;
+      case 4:
+      for( int a = 0; a < stpts4.size(); a++ ){       
+        fill(255);
+        rect(stpts4.get(a).x - 10, stpts4.get(a).y - 10, 20, 20);
+        fill(0);
+        text("P"+str(a+1), stpts4.get(a).x - 9, stpts4.get(a).y - 10 );
+      }
+      break;
+    }
+  }
 }
 
 void draw_cmd( float x, float y, float s ){

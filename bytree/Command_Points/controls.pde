@@ -29,6 +29,10 @@ void keyPressed(){
   if(key=='a' || key=='A'){a=true;}
   if(key=='s' || key=='S'){s=true;}
   if(key=='d' || key=='D'){d=true;}
+  for(int i = 0; i < players.size(); i++){
+    if( key == players.get(i).fireKey ) players.get(i).fire = true;
+  }  
+  if(key == ESC) key = 0;
 }
 void keyReleased(){
   if(keyCode==UP){up=false;}
@@ -39,6 +43,9 @@ void keyReleased(){
   if(key=='a' || key=='A'){a=false;}
   if(key=='s' || key=='S'){s=false;}
   if(key=='d' || key=='D'){d=false;}
+  for(int i = 0; i < players.size(); i++){
+    if( key == players.get(i).fireKey ) players.get(i).fire = false;
+  }
 }
 void mousePressed(){
 

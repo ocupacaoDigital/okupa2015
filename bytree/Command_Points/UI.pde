@@ -27,6 +27,7 @@ Dynamic_Word_Label(word w_, char p, float x_, float y_, float w, float h)
 Dynamic_Number_Label(number i, char p, float x_, float y_, float w, float h)
 Dynamic_Letter_Label(letter i, char p, float x_, float y_, float w, float h)
 */
+
 int textsize;
 
 class number {

@@ -16,26 +16,12 @@ void init_fisica_players(){
   p = new FPoly[int(playerCount.n)];
   for( int i = 0; i < playerCount.n; i++ ){
     p[i] = new FPoly();
-    p[i].setFill( players.get(i).c );
+    p[i].setFill( red(players.get(i).c), green(players.get(i).c), blue(players.get(i).c) );
     p[i].setDamping(1.5);
     p[i].setFriction(0.9);
     
     float x = 0;
     float y = 0;
-    switch(int(playerCount.n)){
-      case 2:
-        x = currentMap.startingLocations2[i].x;
-        y = currentMap.startingLocations2[i].y;
-        break;
-      case 3:
-        x = currentMap.startingLocations3[i].x;
-        y = currentMap.startingLocations3[i].y;
-        break;
-      case 4:
-        x = currentMap.startingLocations4[i].x;
-        y = currentMap.startingLocations4[i].y;
-        break;
-    }
     float l = 0;
     switch( players.get(i).shape ){
       case 't': 
@@ -72,6 +58,23 @@ void init_fisica_players(){
       p[i].vertex(x + l * cos(-k), y + l * sin(-k));
       break;
     }
+    
+    switch(int(playerCount.n)){
+      case 2:
+        x = currentMap.startingLocations2[i].x;
+        y = currentMap.startingLocations2[i].y;
+        break;
+      case 3:
+        x = currentMap.startingLocations3[i].x;
+        y = currentMap.startingLocations3[i].y;
+        break;
+      case 4:
+        x = currentMap.startingLocations4[i].x;
+        y = currentMap.startingLocations4[i].y;
+        break;
+    }
+    
+    p[i].setPosition(x, y);
     
     world.add(p[i]);
   }
@@ -131,4 +134,10 @@ void init_game(){
    players = new ArrayList();
    players.add( new Player() );
    players.add( new Player() );
+   players.get(0).fireKey = ' ';
+   players.get(1).fireKey = ENTER;
+   players.get(0).receive_Item( new Bomb( "bomb", 100) );
+   players.get(1).receive_Item( new Freeze( "lock", 100 ) );
+   
+   //currentMap = new Map( 
 }
