@@ -5,11 +5,15 @@ FWorld world; // variavel 'mundo' do fisica.
 boolean up, down, left, right, w, a, s, d;
 
 float header;
+PImage[] icons;
+
 UISet MainMenu, Settings;
 
 Editor mapEditor;
 
 Map currentMap;
+
+Header theHeader;
 
 ArrayList<Player> players;
 
@@ -50,6 +54,7 @@ void setup(){
   init_Options_UI();
   init_sides( 30 );
   init_fisica_world();
+  thread("load_Icons");
   mapEditor = new Editor();
 }
 void draw(){
@@ -71,6 +76,8 @@ void draw(){
       wall = new FBox[50];
       
       currentMap.initWalls();
+      
+      theHeader = new Header();
       
       /*
       scoreBar=(3/5f)*width;
@@ -101,10 +108,11 @@ void draw(){
         PVector arrows = arrowControls(players.get(1).acc);   
         p[1].addForce(arrows.x, arrows.y);
       }
-      println("D:", p[0].getDensity());
       
       world.step();
       world.draw();
+      
+      theHeader.exe();
       
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'e'://EDITOR|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\

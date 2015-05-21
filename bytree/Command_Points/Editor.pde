@@ -35,7 +35,7 @@ class Editor{
     templates[0] = new Tile( #989079, 1.5 );
     templates[1] = new Tile( #C2E8E8, 0 );
     templates[2] = new Tile( #C1935A, 5 );
-    templates[3] = new Tile( #69E064, 1.5 );
+    templates[3] = new ItemTile( #69E064, 1.5 );
     templates[4] = new Tile( #F28D20, 1.5 );
     L = ceil(width/tileEdge)+1;
     C = ceil((height-header)/tileEdge)+1;
@@ -66,7 +66,7 @@ class Editor{
     //ui.addCharSet(8, 0, "Done", 'c', moment, 'm');
     ui.addToggle(8, 0, "Done", 'c', done);
     
-    type = new letter('a');
+    type = new letter('v');
     size = new number( 80 );
     total = new number( 300 );
     cmd = new UISet( 12, 9, 13, 0.95, 0.8 );
@@ -256,7 +256,7 @@ class Editor{
               case 'c': tiles[x][y] = templates[0]; break; // concrete
               case 'i': tiles[x][y] = templates[1]; break; // ice
               case 'm': tiles[x][y] = templates[2]; break; // mud
-              case 'b': tiles[x][y] = templates[3]; break; // bonus
+              case 'b': tiles[x][y] = templates[3].get(); break; // bonus
               case 't': tiles[x][y] = templates[4]; break; // trap
             }
             pushed = false;

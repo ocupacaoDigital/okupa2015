@@ -54,3 +54,18 @@ void hexagon(float x, float y, float l){
   endShape(CLOSE);
 }
 
+PImage icons( char t ){
+  switch(t){
+    case 'l': return icons[0];
+    case 'b': return icons[1];
+    case 'f': return icons[2];
+    case 'i': return icons[3];
+    case 's': return icons[4];
+    case 'w': return icons[5];
+    default: 
+      PImage x;
+      x = createImage(0, 0, RGB); 
+      return x;
+  }
+}
+

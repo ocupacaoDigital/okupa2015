@@ -80,7 +80,22 @@ void assemble_player_shape( FPoly fp, float l, char s ){
 }
 //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
 //|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
-
+void load_Icons(){
+  icons = new PImage[6];
+  icons[0] = loadImage("Lock.png");
+  icons[1] = loadImage("Bomb.png");
+  icons[2] = loadImage("Freeze.png");
+  icons[3] = loadImage("CmdPt icon.png");
+  icons[4] = loadImage("Speed.png");
+  icons[5] = loadImage("Weight.png");
+  int iconEdge = 50;
+  icons[0].resize(iconEdge, iconEdge);
+  icons[1].resize(iconEdge, iconEdge);
+  icons[2].resize(iconEdge, iconEdge);
+  icons[3].resize(iconEdge, iconEdge);
+  icons[4].resize(iconEdge, iconEdge);
+  icons[5].resize(iconEdge, iconEdge);
+}
 void init_MainMenu_UI(){
   moment = new letter('m');
   
@@ -131,10 +146,12 @@ void init_game(){
    players = new ArrayList();
    players.add( new Player() );
    players.add( new Player() );
+   players.get(0).c = #007aff;
+   players.get(1).c = #ff9f00;
    players.get(0).fireKey = ' ';
    players.get(1).fireKey = ENTER;
-   players.get(0).receive_Item( new Speed( "s", 100) );
-   players.get(1).receive_Item( new Weight( "w", 100 ) );
+   //players.get(0).receive_Item( new Lock( 'l', 100) );
+   //players.get(1).receive_Item( new Bomb( 'b', 100 ) );
    
    //currentMap = new Map( 
 }
