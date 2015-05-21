@@ -5,7 +5,7 @@ class Player{
   float ownage, score, acc;
   public float presence;
   int wins;
-  public int frozen;
+  public int frozen, weighted, speeded;
   public boolean fire;
   boolean pfire;
   Item item;
@@ -24,13 +24,23 @@ class Player{
     presence = 1;
     frozen = 0;
   }
-  void exe(int i){
+  void exe(int i){//++++++++++++++++++++++++++{}*
+    if( weighted == 1 ){
+      p[i].setDensity(1.0);
+    }
+    if( weighted > 0 ) weighted --;
+    //++++++++++++++++++++++++++++++++++++++++{}*
+    if( speeded == 1 ){
+      acc = 1200;
+    }
+    if( speeded > 0 ) speeded --;
+    //++++++++++++++++++++++++++++++++++++++++{}*
     if( frozen == 1 ){
       p[i].setStroke(0);
       p[i].setStrokeWeight( 1 );
     }
     if( frozen > 0 ) frozen --;
-
+    //++++++++++++++++++++++++++++++++++++++++{}*
     if( pfire && !fire ){
       if( item.count > 0 ){
         item.exe( i, p[i].getX(), p[i].getY() );
@@ -51,13 +61,16 @@ class Player{
     
   }
 }
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
+//<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X||>
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
 
 class Map{
   float xo, yo, tileEdge, tileRad;
   int L, C;
   CommandPt[] cmds;
   Tile[][] tiles;
-  IntList spTilesX, spTilesY;
+  //IntList spTilesX, spTilesY;
   PVector[]wall_I;
   PVector[]wall_F;
   float[]wall_W;
@@ -76,17 +89,7 @@ class Map{
     cmds = c.toArray( new CommandPt[c.size()] );
     
     tiles = t;   
-    spTilesX = new IntList();
-    spTilesY = new IntList();
-    for(int x = 0; x < L; x++){   
-      for(int y = 0; y < C; y++){
-        if( tiles[x][y].type != 'f' ){
-          spTilesX.append(x);
-          spTilesY.append(y);
-        }
-      }
-    }
-    
+
     wall_I = i.toArray( new PVector[i.size()] );
     wall_F = f.toArray( new PVector[f.size()] );
     wall_W = w.array();//toArray( new float[w.size()] );
@@ -106,7 +109,6 @@ class Map{
     }
   }
   void exe(){
-    
     for(int i = 0; i < p.length; i++){
         int x = floor((p[i].getX() - xo)/tileEdge)+1;
         int y = floor((p[i].getY() - header - yo)/tileEdge)+1;
@@ -115,7 +117,7 @@ class Map{
     
     for(int x = -1; x < L-1; x++){   
       for(int y = -1; y < C-1; y++){
-        tiles[x+1][y+1].exe();
+        tiles[x+1][y+1].exe(xo + (x * tileEdge), yo + header + (y * tileEdge), tileEdge, tileEdge);
       }
     }
     
@@ -123,6 +125,33 @@ class Map{
     
   }
 }
+
+class Header{
+  int[] ScoreRectX;
+  color[] ScoreTextC;
+  PImage[] Icons;
+  int[] IconCountX;
+  Header(){
+    Icons = new PImage[6];
+    Icons[0] = loadImage("Lock.png");
+    Icons[1] = loadImage("Bomb.png");
+    Icons[2] = loadImage("Freeze.png");
+    Icons[3] = loadImage("CmdPt icon.png");
+    Icons[4] = loadImage("Speed.png");
+    Icons[5] = loadImage("Weight.png");
+    int iconEdge = 50;
+    Icons[0].resize(iconEdge, iconEdge);
+    Icons[1].resize(iconEdge, iconEdge);
+    Icons[2].resize(iconEdge, iconEdge);
+    Icons[3].resize(iconEdge, iconEdge);
+    Icons[4].resize(iconEdge, iconEdge);
+    Icons[5].resize(iconEdge, iconEdge);
+    
+  }
+}
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
+//<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X||>
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
 
 class CommandPt {
   float x, y, size;
@@ -213,6 +242,9 @@ class CommandPt {
      }
   }
 }
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
+//<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X||>
+//X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>X<>||>
 
 class Tile{
   color c;
@@ -221,12 +253,17 @@ class Tile{
     c = c_;
     friction = f; 
   }
-  Tile get(){ return new Tile( type, c, friction ); }
-  void exe(){}
+  Tile get(){ return new Tile( c, friction ); }
+  void exe(float x, float y, float w, float h){
+    fill( c );
+    rect( x, y, w, h );
+  }
   void engage( int i ){
     p[i].setDamping( friction );
   }
 }
+//><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><8
+
 class ItemTile extends Tile{
   char item;
   int cooldown;
@@ -235,9 +272,9 @@ class ItemTile extends Tile{
     item = '0';
     cooldown = 180;
   }
-  void exe(){
+  void exe(float x, float y, float w, float h){
     if( cooldown == 1 ){
-      float r = round( random(-0.4999, 5.4999) );
+      int r = round( random(-0.4999, 5.4999) );
       switch( r ){
         case 0: item ='l'; break;
         case 1: item ='b'; break;
@@ -249,9 +286,9 @@ class ItemTile extends Tile{
     }
     if( cooldown > 0 ) cooldown--;
     
-    fill( tiles[x+1][y+1].c );
-    rect( xo + (x * tileEdge), yo + header + (y * tileEdge), tileEdge, tileEdge);
-    switch( r ){ // ICONS
+    fill( c ); //currentMap.tiles[x+1][y+1].
+    rect( x, y, w, h );
+    switch( item ){ // ICONS
       case 'l': break;
       case 'b': break;
       case 'f': break;
@@ -263,19 +300,22 @@ class ItemTile extends Tile{
   void engage( int i ){
     p[i].setDamping( friction );
     if( item != '0' ){
-      switch( r ){ // ICONS
-        case 'l': players.get(i).receive_Item( new Lock("Lock", 1); break;
-        case 'b': players.get(i).receive_Item( new Bomb("Bomb", 2); break;
-        case 'f': players.get(i).receive_Item( new Freeze("Freeze", 3); break;
-        case 'i': players.get(i).receive_Item( new Instacapture("Instacapture", 1); break;
-        case 's': players.get(i).receive_Item( new Speed("Speed", 1); break;
-        case 'w': players.get(i).receive_Item( new Weight("Weight", 1); break;
+      switch( item ){ // ICONS
+        case 'l': players.get(i).receive_Item( new Lock("Lock", 1)); break;
+        case 'b': players.get(i).receive_Item( new Bomb("Bomb", 2)); break;
+        case 'f': players.get(i).receive_Item( new Freeze("Freeze", 3)); break;
+        case 'i': players.get(i).receive_Item( new Instacapture("Instacapture", 1)); break;
+        case 's': players.get(i).receive_Item( new Speed("Speed", 1)); break;
+        case 'w': players.get(i).receive_Item( new Weight("Weight", 1)); break;
       }
       item = '0';
       cooldown = 600;
     }
   }
 }
+//O><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O
+//><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><8
+//O><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O><><><><><><><><><O
 
 class Item {
   String name;
@@ -288,7 +328,8 @@ class Item {
   void exe(int a, float x, float y){}
   Item get(){ return new Item(); }
 }
-  
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
+
 class Lock extends Item{
   Lock( String n, int c ){
     super(n, c);
@@ -304,6 +345,7 @@ class Lock extends Item{
   }
   Lock get(){ return new Lock ( name, count ); }
 }
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
 
 class Bomb extends Item{
   Bomb( String n, int c ){
@@ -330,6 +372,7 @@ class Bomb extends Item{
   }
   Bomb get(){ return new Bomb ( name, count ); }
 }
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
 
 class Freeze extends Item{
   Freeze( String n, int c ){
@@ -351,6 +394,7 @@ class Freeze extends Item{
   }
   Freeze get(){ return new Freeze ( name, count ); }
 }
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
 
 class Instacapture extends Item{
   Instacapture( String n, int c ){
@@ -367,12 +411,31 @@ class Instacapture extends Item{
   }
   Instacapture get(){ return new Instacapture( name, count ); }
 }
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
+
+class Speed extends Item{
+  Speed( String n, int c ){
+    super(n, c);
+  }
+  void exe(int a, float x, float y){
+    players.get(a).acc += 1200;
+    players.get(a).speeded = 720;
+    count --;
+  }
+  Speed get(){ return new Speed ( name, count ); }
+}
+//:::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]::::::[]&
+
 class Weight extends Item{
   Weight( String n, int c ){
     super(n, c);
   }
   void exe(int a, float x, float y){
-
+    //world.remove(p[a]);
+    //p[a] = new FPoly();
+    //init_fisica_player(a, p[a], 2);
+    p[a].setDensity(10);
+    players.get(a).weighted = 720;
     count --;
   }
   Weight get(){ return new Weight ( name, count ); }

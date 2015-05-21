@@ -62,8 +62,13 @@ void draw(){
       
       break; //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
     case 'f'://PRE-GAME/|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
-      
-      init_fisica_players();
+    
+      p = new FPoly[int(playerCount.n)];
+      for( int i = 0; i < playerCount.n; i++ ){
+        p[i] = new FPoly();
+        init_fisica_player(i, p[i], 1);
+      }
+      wall = new FBox[50];
       
       currentMap.initWalls();
       
@@ -96,6 +101,7 @@ void draw(){
         PVector arrows = arrowControls(players.get(1).acc);   
         p[1].addForce(arrows.x, arrows.y);
       }
+      println("D:", p[0].getDensity());
       
       world.step();
       world.draw();

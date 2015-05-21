@@ -9,77 +9,74 @@ void init_fisica_world(){
   FLine top = new FLine(width, 0, 0, 0);
   top.setPosition(0, header);
   world.add(top);
-  
 }
 
-void init_fisica_players(){
-  p = new FPoly[int(playerCount.n)];
-  for( int i = 0; i < playerCount.n; i++ ){
-    p[i] = new FPoly();
-    p[i].setFill( red(players.get(i).c), green(players.get(i).c), blue(players.get(i).c) );
-    p[i].setDamping(1.5);
-    p[i].setFriction(0.9);
-    
-    float x = 0;
-    float y = 0;
-    float l = 0;
-    switch( players.get(i).shape ){
-      case 't': 
-      l = tri_l;
-      float k = l * sqrt(3) * (1/6f);
-      p[i].vertex(x + (l/2f), y + k );
-      p[i].vertex(x - (l/2f), y + k);
-      p[i].vertex(x, y - 2*k);
+void init_fisica_player(int i, FPoly fp, int scale){
+  fp.setFill( red(players.get(i).c), green(players.get(i).c), blue(players.get(i).c) );
+  fp.setDamping(1.5);
+  fp.setFriction(0.9);
+  
+  float x = 0;
+  float y = 0;
+  
+  assemble_player_shape( fp, scale, players.get(i).shape );
+  
+  switch(int(playerCount.n)){
+    case 2:
+      x = currentMap.startingLocations2[i].x;
+      y = currentMap.startingLocations2[i].y;
       break;
-      case 's':
-      l = square_l / 2f;
-      p[i].vertex(x - l, y - l);
-      p[i].vertex(x - l, y + l);
-      p[i].vertex(x + l, y + l);
-      p[i].vertex(x + l, y - l);
+    case 3:
+      x = currentMap.startingLocations3[i].x;
+      y = currentMap.startingLocations3[i].y;
       break;
-      case 'p': 
-      l = penta_l;
-      k = l / 1.175570505;
-      float a = TWO_PI/5f;
-      float o = - HALF_PI;
-      for(int r = 0; r < 5; r ++){
-        p[i].vertex( x + k * cos( (r * a) + o ), y + k * sin( (r * a) + o ) );
-      }
+    case 4:
+      x = currentMap.startingLocations4[i].x;
+      y = currentMap.startingLocations4[i].y;
       break;
-      case 'h': 
-      l = hex_l;
-      k = PI/3f;
-      p[i].vertex(x + l, y);
-      p[i].vertex(x + l * cos(k), y + l * sin(k));
-      p[i].vertex(x + l * cos(2*k), y + l * sin(2*k));
-      p[i].vertex(x - l, y);
-      p[i].vertex(x + l * cos(-2*k), y + l * sin(-2*k));
-      p[i].vertex(x + l * cos(-k), y + l * sin(-k));
-      break;
-    }
-    
-    switch(int(playerCount.n)){
-      case 2:
-        x = currentMap.startingLocations2[i].x;
-        y = currentMap.startingLocations2[i].y;
-        break;
-      case 3:
-        x = currentMap.startingLocations3[i].x;
-        y = currentMap.startingLocations3[i].y;
-        break;
-      case 4:
-        x = currentMap.startingLocations4[i].x;
-        y = currentMap.startingLocations4[i].y;
-        break;
-    }
-    
-    p[i].setPosition(x, y);
-    
-    world.add(p[i]);
   }
   
-  wall = new FBox[50];
+  fp.setPosition(x, y);
+  
+  world.add(fp);
+}
+
+void assemble_player_shape( FPoly fp, float l, char s ){
+  switch( s ){
+    case 't': 
+    l *= tri_l;
+    float k = l * sqrt(3) * (1/6f);
+    fp.vertex((l/2f), k );
+    fp.vertex(-(l/2f), k);
+    fp.vertex(0, -2*k);
+    break;
+    case 's':
+    l *= square_l / 2f;
+    fp.vertex(-l, -l);
+    fp.vertex(-l, l);
+    fp.vertex(l, l);
+    fp.vertex(l, -l);
+    break;
+    case 'p': 
+    l *= penta_l;
+    k = l / 1.175570505;
+    float a = TWO_PI/5f;
+    float o = - HALF_PI;
+    for(int r = 0; r < 5; r ++){
+      fp.vertex( k * cos( (r * a) + o ), k * sin( (r * a) + o ) );
+    }
+    break;
+    case 'h': 
+    l *= hex_l;
+    k = PI/3f;
+    fp.vertex(l, 0);
+    fp.vertex(l * cos(k), l * sin(k));
+    fp.vertex(l * cos(2*k), l * sin(2*k));
+    fp.vertex(-l, 0);
+    fp.vertex(l * cos(-2*k), l * sin(-2*k));
+    fp.vertex(l * cos(-k), l * sin(-k));
+    break;
+  }
 }
 //|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//
 //|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\
@@ -136,8 +133,8 @@ void init_game(){
    players.add( new Player() );
    players.get(0).fireKey = ' ';
    players.get(1).fireKey = ENTER;
-   players.get(0).receive_Item( new Bomb( "bomb", 100) );
-   players.get(1).receive_Item( new Freeze( "lock", 100 ) );
+   players.get(0).receive_Item( new Speed( "s", 100) );
+   players.get(1).receive_Item( new Weight( "w", 100 ) );
    
    //currentMap = new Map( 
 }

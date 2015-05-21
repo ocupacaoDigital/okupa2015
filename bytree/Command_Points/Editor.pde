@@ -32,11 +32,11 @@ class Editor{
     wallWidths = new FloatList();
     
     templates = new Tile[5];
-    templates[0] = new Tile('f', #989079, 1.5);
-    templates[1] = new Tile('f', #C2E8E8, 0);
-    templates[2] = new Tile('f', #C1935A, 5);
-    templates[3] = new Tile('i', #69E064, 1.5);
-    templates[4] = new Tile('t', #F28D20, 1.5);
+    templates[0] = new Tile( #989079, 1.5 );
+    templates[1] = new Tile( #C2E8E8, 0 );
+    templates[2] = new Tile( #C1935A, 5 );
+    templates[3] = new Tile( #69E064, 1.5 );
+    templates[4] = new Tile( #F28D20, 1.5 );
     L = ceil(width/tileEdge)+1;
     C = ceil((height-header)/tileEdge)+1;
     tiles = new Tile[L][C];
@@ -131,7 +131,7 @@ class Editor{
      float mY = header + yo + tileRad * round((mouseY - header - yo)/tileRad);
       
       switch( action.l ){//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|
-        case 'c': ///|\\|//|\\|//|\\|//|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|
+        case 'c': ///|\\|//|\\|//|\\|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|\\|//|
           cmd.exe();
           if( type.l == 's' ) scoreRateSlider.exe(cmd.CS);
           
